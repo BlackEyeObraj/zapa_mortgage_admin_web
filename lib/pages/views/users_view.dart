@@ -107,6 +107,7 @@ class UsersView extends GetView<UsersViewController>{
                             child: DropdownButtonFormField2<String>(
                               isExpanded: false,
                               decoration: InputDecoration(
+
                                 // Add Horizontal padding using menuItemStyleData.padding so it matches
                                 // the menu padding when button's width is not specified.
                                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
