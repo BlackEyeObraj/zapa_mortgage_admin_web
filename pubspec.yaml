@@ -42,8 +42,9 @@ dependencies:
   image_network: ^2.5.4+1
   flutter_switch: ^0.3.2
   dropdown_button2: ^2.1.4
-  intl: ^0.18.1
-
+  test_api: ^0.6.0
+  intl: ^0.18.0
+  phone_form_field: ^8.1.0
 
 dev_dependencies:
   flutter_launcher_icons: "^0.13.1"

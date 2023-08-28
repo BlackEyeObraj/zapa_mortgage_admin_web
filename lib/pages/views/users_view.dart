@@ -2,13 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:image_network/image_network.dart';
 import 'package:zapa_mortgage_admin_web/controllers/users_view_controller.dart';
 import 'package:zapa_mortgage_admin_web/res/app_colors.dart';
 import 'package:zapa_mortgage_admin_web/services/firestore_service.dart';
 import 'package:zapa_mortgage_admin_web/utils/dialogs/borrower_dialog.dart';
-import 'package:zapa_mortgage_admin_web/utils/dialogs/loa_dialog.dart';
 import 'package:zapa_mortgage_admin_web/utils/dialogs/nick_name_dialog.dart';
 import 'package:zapa_mortgage_admin_web/utils/routes/route_name.dart';
 
