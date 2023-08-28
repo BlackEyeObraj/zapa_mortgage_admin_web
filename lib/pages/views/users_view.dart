@@ -7,6 +7,7 @@ import 'package:image_network/image_network.dart';
 import 'package:zapa_mortgage_admin_web/controllers/users_view_controller.dart';
 import 'package:zapa_mortgage_admin_web/res/app_colors.dart';
 import 'package:zapa_mortgage_admin_web/services/firestore_service.dart';
+import 'package:zapa_mortgage_admin_web/utils/dialogs/borrower_dialog.dart';
 import 'package:zapa_mortgage_admin_web/utils/dialogs/loa_dialog.dart';
 import 'package:zapa_mortgage_admin_web/utils/dialogs/nick_name_dialog.dart';
 import 'package:zapa_mortgage_admin_web/utils/routes/route_name.dart';
@@ -26,6 +27,7 @@ class UsersView extends GetView<UsersViewController>{
               children: [
                 Expanded(
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Column(
                         children: [
@@ -168,43 +170,70 @@ class UsersView extends GetView<UsersViewController>{
 
                         ],
                       ),
+                      SizedBox(width: 8,),
+                      Column(
+                        children: [
+                          Text('Search by name / Phone Number',style: TextStyle(fontWeight: FontWeight.bold),),
+                          Container(
+                            height: Get.height * .064,
+                            width: 200,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey, width: 1.0),
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: const Icon(Icons.search,color: AppColors.primaryColor,), // Replace with your desired icon
+                                ),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: controller.searchPhoneNumberTextController,
+                                    onChanged: (String phoneNumber){
+                                      controller.setPhoneNumber(phoneNumber.isNotEmpty?phoneNumber:'');
+                                    },
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      hintText: 'Type Here',
+                                      hintStyle: TextStyle(fontSize: 12),
+                                      border: InputBorder.none,
+                                      contentPadding: const EdgeInsets.only(
+                                          bottom: 4),
+                                      prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                                    ),
+
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ).marginOnly(right: 8),
+                        ],
+                      ),
                     ],
                   ).marginOnly(left: 16),
                 ),
-                Container(
-                  height: 40,
-                  width: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black, width: 1.0),
-                    borderRadius: BorderRadius.circular(4.0),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8.0),
-                        child: const Icon(Icons.search,color: AppColors.primaryColor,), // Replace with your desired icon
-                      ),
-                      Expanded(
-                        child: TextFormField(
-                          controller: controller.searchPhoneNumberTextController,
-                          onChanged: (String phoneNumber){
-                            controller.setPhoneNumber(phoneNumber.isNotEmpty?phoneNumber:'');
-                          },
-                          decoration: InputDecoration(
-                            isDense: true,
-                            hintText: 'Search User e.g Nick Name or Phone Number',
-                            hintStyle: TextStyle(fontSize: 12),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.only(
-                                bottom: 4),
-                            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-                          ),
-
-                        ),
-                      ),
-                    ],
-                  ),
-                ).marginOnly(right: 8)
+                InkWell(
+                  onTap: (){
+                    BorrowerDialog().addLiabilityDialog();
+                  },
+                  child: Container(
+                    height: Get.height * .06,
+                    width: 120,
+                    decoration: BoxDecoration(
+                        color: AppColors.secondaryColor,
+                        borderRadius: BorderRadius.circular(10000)
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Icon(Icons.add,color: AppColors.whiteColor,),
+                        Text('Add Borrower',style: TextStyle(color: AppColors.textColorWhite),)
+                      ],
+                    ),
+                  ).marginOnly(right: 8),
+                )
               ],
             ).marginOnly(top: 16),
 

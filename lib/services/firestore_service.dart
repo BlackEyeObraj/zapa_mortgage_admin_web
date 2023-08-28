@@ -15,6 +15,30 @@ class FirestoreService extends GetxService {
   final firestore = FirebaseFirestore.instance;
   final box = GetStorage();
 
+  addNewBorrower(String phoneNumber) async {
+    DocumentReference newDocRef = FirebaseFirestore.instance.collection('users').doc();
+    String newUserId = newDocRef.id;
+    await newDocRef.set({
+      'userId': newUserId,
+      'phoneNumber': phoneNumber,
+      'accountCreatedDate': DateTime.now(),
+      'userName' : '',
+      'nickName' : '',
+      'userImage' : '',
+      'assignedTo' : '',
+      'borrowerActiveLastDateTime' : '',
+      'lastViewedBy' : '',
+      'lastViewTimeBy' : '',
+      'doNotCall' : 'no',
+      'lastEngagement' : '',
+      'nextEngagement' : '',
+      'customerAgent' : '',
+      'ourAgent' : '',
+      'agentCheckBorrower' : '',
+    });
+  }
+
+
   Future<String> getAccountStatus(String docId) async {
     try {
       var documentSnapshot = await firestore.collection('AdminMembers').doc(docId).get();
