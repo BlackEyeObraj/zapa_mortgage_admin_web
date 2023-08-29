@@ -15,18 +15,18 @@ class FirestoreService extends GetxService {
   final firestore = FirebaseFirestore.instance;
   final box = GetStorage();
 
-  addNewBorrower(String phoneNumber) async {
+  addNewBorrower(String borrowerName,String phoneNumber) async {
     DocumentReference newDocRef = FirebaseFirestore.instance.collection('users').doc();
     String newUserId = newDocRef.id;
     await newDocRef.set({
       'userId': newUserId,
       'phoneNumber': phoneNumber,
       'accountCreatedDate': DateTime.now(),
-      'userName' : '',
+      'userName' : borrowerName,
       'nickName' : '',
       'userImage' : '',
       'assignedTo' : '',
-      'borrowerActiveLastDateTime' : '',
+      'borrowerActiveLastDateTime' : DateTime.now(),
       'lastViewedBy' : '',
       'lastViewTimeBy' : '',
       'doNotCall' : 'no',
@@ -36,6 +36,7 @@ class FirestoreService extends GetxService {
       'ourAgent' : '',
       'agentCheckBorrower' : '',
     });
+    Get.back();
   }
 
 

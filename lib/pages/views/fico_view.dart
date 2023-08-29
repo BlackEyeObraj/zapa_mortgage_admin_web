@@ -69,10 +69,10 @@ class FicoView extends GetView<FicoViewController>{
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(zapaScoreValue,
+                                      Text(zapaScoreValue ?? '0',
                                         style: TextStyle(fontSize: 100,fontWeight: FontWeight.bold,color: AppColors.primaryColor),),
                                       IconButton(onPressed: (){
-                                        FicoDialog().addFicoDialogue(borrowerId,zapaScoreValue,'zapa');
+                                        FicoDialog().addFicoDialogue(borrowerId,zapaScoreValue ?? '0','zapa');
                                       }, icon: Icon(Icons.edit,color: AppColors.secondaryColor,))
                                     ],
                                   ),
@@ -116,10 +116,10 @@ class FicoView extends GetView<FicoViewController>{
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(userScoreValue,
+                                      Text(userScoreValue?? '0',
                                         style: TextStyle(fontSize: 100,fontWeight: FontWeight.bold,color: AppColors.primaryColor),),
                                       IconButton(onPressed: (){
-                                        FicoDialog().addFicoDialogue(borrowerId,userScoreValue,'borrower');
+                                        FicoDialog().addFicoDialogue(borrowerId,userScoreValue ?? '0','borrower');
 
                                       }, icon: Icon(Icons.edit,color: AppColors.secondaryColor,))
                                     ],

@@ -88,11 +88,9 @@ class BorrowerDiscussionMessageDialog {
                                 }else if (messageTextController.text.trim().isEmpty) {
                                   SnackBarApp().errorSnack('Form Error', 'Message field must not be empty.');
                                 }else {
-                                  // await FirestoreService().addMessage(
-                                  //     borrowerId,messageTextController.text);
                                   ShareSendDialog().shareAndSend();
                                 }
-                              }, child: Text('Share & Add Message',
+                              }, child: Text('Share with Agent & Add Message',
                               style: TextStyle(fontWeight: FontWeight.bold))),
                         ),
                       ),
@@ -186,7 +184,7 @@ class BorrowerDiscussionMessageDialog {
                       keyboardType: TextInputType.multiline,
                       style: TextStyle(fontSize: 18),
                       decoration: InputDecoration.collapsed(
-                        hintText: 'Type your remark / note here .....',
+                        hintText: 'Type your message here .....',
                       ),
                     ).paddingAll(16),
                   ),

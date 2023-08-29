@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:phone_form_field/phone_form_field.dart';
+import 'package:zapa_mortgage_admin_web/services/firestore_service.dart';
 import '../../res/app_colors.dart';
+import '../snack_bar.dart';
 
 class BorrowerDialog{
   addLiabilityDialog(){
     final box = GetStorage();
     PhoneController phoneNumberController = PhoneController(null);
+    final borrowerTextController = TextEditingController(text: '');
     String phoneNumber = '';
     String countryCode = '+1';
 
@@ -22,8 +25,21 @@ class BorrowerDialog{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Phone Number *',style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.primaryColor,
+              Text('Borrower Name',style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.primaryColor,
                   fontSize: 12),),
+              TextFormField(
+                controller: borrowerTextController,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                    hintText: 'Type Name',
+                    hintStyle: TextStyle(fontSize: 12),
+                    border: const OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                        vertical: Get.height * .01, horizontal: Get.width * .02)
+                ),
+              ),
+              Text('Phone Number *',style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.primaryColor,
+                  fontSize: 12),).marginOnly(top: 8),
               PhoneFormField(
                   controller: phoneNumberController,
                   defaultCountry: IsoCode.US,
@@ -44,7 +60,13 @@ class BorrowerDialog{
                 width: Get.width * .2,
                 height: 48,
                 child: ElevatedButton(
-                    onPressed: (){},
+                    onPressed: (){
+                      if(phoneNumber.isEmpty){
+                        SnackBarApp().errorSnack('Info Incomplete', 'Please enter borrower phone number}');
+                      }else{
+                        FirestoreService().addNewBorrower(borrowerTextController.text, "+${countryCode}${phoneNumber}");
+                      }
+                    },
                     child: Text('Add Borrower')),
               ).marginOnly(top: 16)
             ],

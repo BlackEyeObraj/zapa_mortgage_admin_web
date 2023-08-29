@@ -519,7 +519,7 @@ class SummaryView extends GetView<SummaryViewController>{
                                   }
                                   dynamic zapaScoreValue =
                                   ficoObject != null ? ficoObject['zapaScore'] ?? '0':'0';
-                                  return Text(zapaScoreValue,
+                                  return Text(zapaScoreValue ?? '0',
                                   style: TextStyle(fontSize: 28,fontWeight: FontWeight.bold,color: AppColors.primaryColor),);
                                 },
                               ),
@@ -549,7 +549,7 @@ class SummaryView extends GetView<SummaryViewController>{
                                   }
 
                                   dynamic userScoreValue = ficoObject != null ? ficoObject['userScore'] : '0';
-                                  return Text(userScoreValue,
+                                  return Text(userScoreValue ?? '0',
                                   style: TextStyle(fontSize: 28,fontWeight: FontWeight.bold,color: AppColors.primaryColor),);
                                 },
                               ),
