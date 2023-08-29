@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:zapa_mortgage_admin_web/services/firestore_service.dart';
 import '../../res/app_colors.dart';
 import '../snack_bar.dart';
 
 class BorrowerDialog{
-  addLiabilityDialog(){
-    final box = GetStorage();
+  addBorrowerDialog(){
     PhoneController phoneNumberController = PhoneController(null);
     final borrowerTextController = TextEditingController(text: '');
     String phoneNumber = '';
@@ -46,7 +44,7 @@ class BorrowerDialog{
                   decoration: InputDecoration(
                       hintText: 'Phone Number',
                       border: const OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(vertical: Get.height * .02,horizontal: Get.width * .02)
+                      contentPadding: EdgeInsets.symmetric(vertical: Get.height * .02,horizontal: Get.width * .01)
                   ),
                   validator: PhoneValidator.validMobile(),
                   // isCountryChipPersistent: true, // default
@@ -62,12 +60,12 @@ class BorrowerDialog{
                 child: ElevatedButton(
                     onPressed: (){
                       if(phoneNumber.isEmpty){
-                        SnackBarApp().errorSnack('Info Incomplete', 'Please enter borrower phone number}');
+                        SnackBarApp().errorSnack('Info Incomplete', 'Please enter borrower phone number');
                       }else{
-                        FirestoreService().addNewBorrower(borrowerTextController.text, "+${countryCode}${phoneNumber}");
+                        FirestoreService().phoneAuthService(borrowerTextController.text, "+${countryCode}${phoneNumber}");
                       }
                     },
-                    child: Text('Add Borrower')),
+                    child: Text('Send Verification Code')),
               ).marginOnly(top: 16)
             ],
           ).marginSymmetric(horizontal: 8),

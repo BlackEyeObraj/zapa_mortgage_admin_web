@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth_web/firebase_auth_web.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:zapa_mortgage_admin_web/utils/constants.dart';
+import 'package:zapa_mortgage_admin_web/utils/dialogs/otp_dialog.dart';
 
 enum SignResponseReturns {
   loginSuccess,
@@ -13,6 +16,7 @@ enum SignResponseReturns {
 
 class FirestoreService extends GetxService {
   final firestore = FirebaseFirestore.instance;
+  final auth = FirebaseAuth.instance;
   final box = GetStorage();
 
   addNewBorrower(String borrowerName,String phoneNumber) async {
@@ -38,7 +42,90 @@ class FirestoreService extends GetxService {
     });
     Get.back();
   }
+  phoneAuthService(String borrowerName,String phoneNumber) async {
+    try{
+      // await FirebaseAuth.instance.verifyPhoneNumber(
+      //   phoneNumber: phoneNumber,
+      //   verificationCompleted: (PhoneAuthCredential credential) async {
+      //     // await auth.signInWithCredential(credential);
+      //   },
+      //   verificationFailed: (FirebaseAuthException e) {
+      //     if (e.code == 'invalid-phone-number') {
+      //       print(e.code.toString());
+      //     }
+      //   },
+      //   codeSent: (String verificationId, int? resendToken) {
+      //     OtpDialog().otpDialog(borrowerName,verificationId);
+      //   },
+      //   codeAutoRetrievalTimeout: (String verificationId) {
+      //   },
+      // );
+      ConfirmationResult confirmationResult = await auth.signInWithPhoneNumber(phoneNumber);
+      print(confirmationResult.verificationId);
+      OtpDialog().otpDialog(borrowerName, confirmationResult.verificationId,confirmationResult,auth);
+      // verifyOtpCode(confirmationResult.verificationId, 'otpCode', borrowerName,confirmationResult);
+    }catch(e){
+      print(e.toString());
+    }
 
+  }
+  verifyOtpCode(String verificationId, String otpCode,String borrowerName, ConfirmationResult confirmationResult, FirebaseAuth auth) async {
+    UserCredential userCredential = await confirmationResult.confirm(otpCode);
+    String userId = userCredential.user!.uid;
+    String? userPhoneNumber = userCredential.user!.phoneNumber;
+    await FirebaseFirestore.instance.collection('users').doc(userId).set({
+      'userId': userId,
+      'phoneNumber': userPhoneNumber,
+      'accountCreatedDate': DateTime.now(),
+      'userName' : borrowerName,
+      'nickName' : '',
+      'userImage' : '',
+      'assignedTo' : '',
+      'borrowerActiveLastDateTime' : '',
+      'lastViewedBy' : '',
+      'lastViewTimeBy' : '',
+      'doNotCall' : 'no',
+      'lastEngagement' : '',
+      'nextEngagement' : '',
+      'customerAgent' : '',
+      'ourAgent' : '',
+      'agentCheckBorrower' : '',
+    });
+    await auth.signOut();
+    Get.back();
+    Get.back();
+    // try {
+    //   final credentials = PhoneAuthProvider.credential(
+    //     verificationId: verificationId,
+    //     smsCode: otpCode,
+    //   );
+    //   await auth.signInWithCredential(credentials);
+    //   String userId = auth.currentUser!.uid;
+    //   String? userPhoneNumber = auth.currentUser!.phoneNumber;
+    //     await FirebaseFirestore.instance.collection('users').doc(userId).set({
+    //       'userId': userId,
+    //       'phoneNumber': userPhoneNumber,
+    //       'accountCreatedDate': DateTime.now(),
+    //       'userName' : borrowerName,
+    //       'nickName' : '',
+    //       'userImage' : '',
+    //       'assignedTo' : '',
+    //       'borrowerActiveLastDateTime' : '',
+    //       'lastViewedBy' : '',
+    //       'lastViewTimeBy' : '',
+    //       'doNotCall' : 'no',
+    //       'lastEngagement' : '',
+    //       'nextEngagement' : '',
+    //       'customerAgent' : '',
+    //       'ourAgent' : '',
+    //       'agentCheckBorrower' : '',
+    //     });
+
+    // } catch (error) {
+    //   Get.back();
+    //   print(error.toString());
+    // }
+  }
 
   Future<String> getAccountStatus(String docId) async {
     try {

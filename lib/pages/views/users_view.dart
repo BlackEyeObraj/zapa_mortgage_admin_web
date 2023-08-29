@@ -213,7 +213,7 @@ class UsersView extends GetView<UsersViewController>{
                 ),
                 InkWell(
                   onTap: (){
-                    BorrowerDialog().addLiabilityDialog();
+                    BorrowerDialog().addBorrowerDialog();
                   },
                   child: Container(
                     height: Get.height * .06,
