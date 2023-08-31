@@ -1,4 +1,6 @@
 class Constants{
+  String appName = 'ZAPA Mortgage';
+
   static const String USER_ID = 'USER_ID';
   static const String USER_NAME = 'USER_NAME';
   static const String USER_EMAIL = 'USER_EMAIL';

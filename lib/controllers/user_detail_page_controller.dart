@@ -13,7 +13,7 @@ class UserDetailPageController extends GetxController{
   final FirestoreService firestoreService = FirestoreService();
 
   RxString _borrowerId = ''.obs;
-  RxString _userPhoneNumber = ''.obs;
+  RxString _borrowerPhoneNumber = ''.obs;
   final RxString _selectedTab = 'Summary'.obs;
   final RxBool _summaryOptionHover = false.obs;
   final RxBool _ficoOptionHover = false.obs;
@@ -21,11 +21,12 @@ class UserDetailPageController extends GetxController{
   final RxBool _liabilityOptionHover = false.obs;
   final RxBool _fundsOptionHover = false.obs;
   final RxBool _scenarioOptionHover = false.obs;
+  final RxBool _coBorrowersOptionHove = false.obs;
   final RxBool _borrowerDiscussionsOptionHover = false.obs;
 
 
   String get borrowerId => _borrowerId.value;
-  String get userPhoneNumber => _userPhoneNumber.value;
+  String get borrowerPhoneNumber => _borrowerPhoneNumber.value;
   String get selectedTab => _selectedTab.value;
   bool get summaryOptionHover => _summaryOptionHover.value;
   bool get ficoOptionHover => _ficoOptionHover.value;
@@ -33,6 +34,7 @@ class UserDetailPageController extends GetxController{
   bool get liabilityOptionHover => _liabilityOptionHover.value;
   bool get fundsOptionHover => _fundsOptionHover.value;
   bool get scenarioOptionHover => _scenarioOptionHover.value;
+  bool get coBorrowersOptionHove => _coBorrowersOptionHove.value;
   bool get borrowerDiscussionsOptionHover => _borrowerDiscussionsOptionHover.value;
 
   @override
@@ -43,6 +45,7 @@ class UserDetailPageController extends GetxController{
       Get.offAndToNamed(RouteName.signIn);
     }else{
       _borrowerId.value  = Get.arguments['borrowerId'];
+      _borrowerPhoneNumber.value  = Get.arguments['borrowerPhoneNumber'];
       FirestoreService().setLastViewedBy(borrowerId, box.read(Constants.USER_NAME),DateTime.now());
       statusSubscription = firestoreService.getAccountStatusStream(box.read(Constants.USER_ID)).listen((status) {
         if(status == 'inActive'){
@@ -75,6 +78,8 @@ class UserDetailPageController extends GetxController{
       _fundsOptionHover.value = value;
     }else if(option == 'Scenario'){
       _scenarioOptionHover.value = value;
+    }else if(option == 'coBorrowers'){
+      _coBorrowersOptionHove.value = value;
     }else if(option == 'BorrowerDiscussions'){
       _borrowerDiscussionsOptionHover.value = value;
     }

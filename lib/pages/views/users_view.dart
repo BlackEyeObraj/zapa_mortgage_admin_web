@@ -393,7 +393,7 @@ class UsersView extends GetView<UsersViewController>{
 
                             InkWell(
                               onTap: ()async{
-                                Get.toNamed(RouteName.userDetailScreen,arguments: {'borrowerId': data['userId']});
+                                Get.toNamed(RouteName.userDetailScreen,arguments: {'borrowerId': data['userId'],'borrowerPhoneNumber': data['phoneNumber'],});
                               },
                               child: MouseRegion(
                                 onEnter: (_) => controller.setHoverOption(data['phoneNumber']),

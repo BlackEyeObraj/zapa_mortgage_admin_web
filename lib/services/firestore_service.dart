@@ -925,4 +925,15 @@ class FirestoreService extends GetxService {
     });
     // Get.put(HomeScreenController()).setTotal();
   }
+  updateCoBorrower(String id,String coBorrowerFICO, String coBorrowerIncome, String coBorrowerLiability)async{
+    await firestore.collection('CoBorrowers').doc(id).update({
+      'coBorrowerVerifiedFICO': coBorrowerFICO.isEmpty?'0':coBorrowerFICO,
+      'coBorrowerVerifiedIncome': coBorrowerIncome.isEmpty?'0.00':coBorrowerIncome,
+      'coBorrowerVerifiedLiability': coBorrowerLiability.isEmpty?'0.00':coBorrowerLiability,
+    });
+    Get.back();
+  }
+  getCoBorrower(String phoneNumber){
+    return FirebaseFirestore.instance.collection('CoBorrowers').where('borrowerPhoneNumber',isEqualTo: phoneNumber).snapshots();
+  }
 }

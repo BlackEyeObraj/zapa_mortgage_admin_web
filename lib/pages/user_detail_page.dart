@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:zapa_mortgage_admin_web/controllers/user_detail_page_controller.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/borrower_discussion_view.dart';
+import 'package:zapa_mortgage_admin_web/pages/views/co_borrower_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/fico_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/funds_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/income_view.dart';
@@ -225,6 +226,34 @@ class UserDetailPage extends GetView<UserDetailPageController>{
                                         ).marginOnly(top: 16),
                                         InkWell(
                                           onTap: (){
+                                            controller.setTabOption('coBorrowers');
+                                          },
+                                          child: MouseRegion(
+                                            onEnter: (_) => controller.setHoverOption('coBorrowers', true),
+                                            onExit: (_) => controller.setHoverOption('coBorrowers', false),
+                                            child:Obx(() => Container(
+                                              width: Get.width * 1,
+                                              height: 48,
+                                              decoration: BoxDecoration(
+                                                  color: controller.coBorrowersOptionHove || controller.selectedTab == 'coBorrowers'?AppColors.whiteColor:AppColors.transparentColor,
+                                                  border: Border.all(color: AppColors.whiteColor),
+                                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(10),bottomLeft: Radius.circular(10),
+                                                      topRight: Radius.circular(10),bottomRight: Radius.circular(10))
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  // Icon(Icons.settings,color: controller.fundsOptionHover || controller.selectedTab == 'Funds'?AppColors.primaryColor:AppColors.whiteColor,),
+                                                  // const SizedBox(width: 16,),
+                                                  Text('Co-Borrowers',style: TextStyle(color: controller.coBorrowersOptionHove || controller.selectedTab == 'coBorrowers'?AppColors.primaryColor:AppColors.whiteColor,
+                                                      fontWeight: FontWeight.bold,fontSize: 16),)
+                                                ],
+                                              ),
+                                            ),),
+                                          ),
+                                        ).marginOnly(top: 16),
+                                        InkWell(
+                                          onTap: (){
                                             controller.setTabOption('BorrowerDiscussions');
                                           },
                                           child: MouseRegion(
@@ -271,6 +300,7 @@ class UserDetailPage extends GetView<UserDetailPageController>{
                       controller.selectedTab == 'Income'?IncomeView(borrowerId: controller.borrowerId,):
                       controller.selectedTab == 'Liability'?LiabilityView(borrowerId: controller.borrowerId,):
                       controller.selectedTab == 'Funds'?FundsView(borrowerId: controller.borrowerId,):
+                      controller.selectedTab == 'coBorrowers'?CoBorrowerView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
                       controller.selectedTab == 'BorrowerDiscussions'?BorrowerDiscussionView(borrowerId: controller.borrowerId,adminId: GetStorage().read(Constants.USER_ID),):SizedBox(),
                     ))
                 ),
