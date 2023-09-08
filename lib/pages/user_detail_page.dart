@@ -295,7 +295,7 @@ class UserDetailPage extends GetView<UserDetailPageController>{
                     child:Obx(() => SizedBox(
                       width: Get.width * 1,
                       height: Get.height * 1,
-                      child: controller.selectedTab == 'Summary'?SummaryView(borrowerId: controller.borrowerId,):
+                      child: controller.selectedTab == 'Summary'?SummaryView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,borrowerName: controller.borrowerName,):
                       controller.selectedTab == 'FICO'?FicoView(borrowerId: controller.borrowerId,):
                       controller.selectedTab == 'Income'?IncomeView(borrowerId: controller.borrowerId,):
                       controller.selectedTab == 'Liability'?LiabilityView(borrowerId: controller.borrowerId,):

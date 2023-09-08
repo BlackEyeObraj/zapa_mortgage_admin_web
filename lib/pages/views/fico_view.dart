@@ -6,7 +6,6 @@ import '../../controllers/fico_view_controller.dart';
 import '../../res/app_colors.dart';
 import '../../services/firestore_service.dart';
 import '../../utils/dialogs/fico_dialog.dart';
-import '../../utils/widgets/text_widget.dart';
 
 class FicoView extends GetView<FicoViewController>{
   final String borrowerId;

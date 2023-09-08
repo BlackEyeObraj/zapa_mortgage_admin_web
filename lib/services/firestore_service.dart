@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth_web/firebase_auth_web.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:zapa_mortgage_admin_web/utils/constants.dart';
@@ -389,12 +390,13 @@ class FirestoreService extends GetxService {
     CollectionReference remarksAndNotes = FirebaseFirestore.instance.collection('users').doc(borrowerId).collection('Messages');
     return remarksAndNotes.orderBy('addedDateTime', descending: true);
   }
-  void addEditUserNickName(String userId, Map<String, dynamic> updatedData) async {
+  void addEditUserNickName(String userId, Map<String, dynamic> updatedData, String nickName, String userName, String phoneNumber) async {
     CollectionReference collectionReference = FirebaseFirestore.instance.collection('users');
     DocumentReference docReference = collectionReference.doc(userId);
     try {
       await docReference.update(updatedData);
       print('Document updated successfully');
+      await historyDataAdd("${box.read(Constants.USER_NAME)} has change nick name to ${nickName.isEmpty?'N/A':nickName} of ${userName.isEmpty?phoneNumber:userName}");
       Get.back();
     } catch (e) {
       print('Error updating document: $e');
@@ -651,13 +653,43 @@ class FirestoreService extends GetxService {
         .snapshots()
         .map((snapshot) => snapshot);
   }
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getFunds(String borrowerId) async* {
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getFunds(String borrowerId, String searchFilter) async* {
     yield* FirebaseFirestore.instance
         .collection('users')
         .doc(borrowerId)
         .snapshots()
         .map((snapshot) => snapshot);
   }
+
+  // Stream<QuerySnapshot<Map<String, dynamic>>> getFunds(String borrowerId, String searchFilter) {
+  //   final controller = StreamController<QuerySnapshot<Map<String, dynamic>>>();
+  //   FirebaseFirestore.instance
+  //       .collection('users')
+  //       .doc(borrowerId)
+  //       .snapshots()
+  //       .listen((snapshot) {
+  //     if (snapshot.exists) {
+  //       final borrowerData = snapshot.data();
+  //       final value = borrowerData!['addedBy']; // Replace 'yourFieldValue' with the actual field name you want to filter on
+  //
+  //       FirebaseFirestore.instance
+  //           .collection('users')
+  //           .where(searchFilter == 'All'?'':searchFilter == 'LOA'?'processor':searchFilter == 'Borrower'?'customer':'', isEqualTo: value) // Replace 'yourFieldName' with the actual field name you want to filter on
+  //           .snapshots()
+  //           .listen((filteredSnapshot) {
+  //         controller.add(filteredSnapshot);
+  //       });
+  //     } else {
+  //       // Handle the case where the borrowerId document doesn't exist
+  //       // You can add an error message to the controller or close it here
+  //       controller.addError('Borrower ID document not found');
+  //     }
+  //   });
+  //
+  //   return controller.stream;
+  // }
+
+
   Future<void> updateUserVerifyFundValue(String borrowerId,int index, bool selectedAssetTypeEnable) async {
     String userId = borrowerId;
     CollectionReference usersCollection =
@@ -699,6 +731,47 @@ class FirestoreService extends GetxService {
     // Get.put(HomeScreenController()).setTotal();
     Get.back();
   }
+  Future<void> updateFundValues(String selectedAddedBy,String borrowerId,int index, String bankName, String accountNumber, String currentBalance, String assetType, bool selectedAssetTypeEnable, String status, String verifyStatus) async {
+    String userId = borrowerId;
+    CollectionReference usersCollection =
+    FirebaseFirestore.instance.collection('users');
+
+    DocumentSnapshot<Object?> snapshot =
+    await usersCollection.doc(userId).get();
+
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+    List<dynamic> liabilities = data['funds'];
+    liabilities[index]['addedBy'] = selectedAddedBy;
+    liabilities[index]['accountNumber'] = accountNumber;
+    liabilities[index]['assetType'] = assetType;
+    liabilities[index]['bankName'] = bankName;
+    liabilities[index]['currentBalance'] = currentBalance;
+    liabilities[index]['userVerifiedFund'] = selectedAssetTypeEnable;
+    liabilities[index]['status'] = status;
+    liabilities[index]['verifyStatus'] = verifyStatus;
+
+    await usersCollection.doc(userId).update({
+      'funds': liabilities,
+    });
+    Get.back();
+  }
+  Future<void> removeFunds(int index, String borrowerID) async {
+      CollectionReference usersCollection =
+      FirebaseFirestore.instance.collection('users');
+      DocumentSnapshot<Object?> snapshot =
+      await usersCollection.doc(borrowerID).get();
+      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+      List<dynamic> liabilities = data['funds'];
+      liabilities.removeAt(index);
+
+      await usersCollection.doc(borrowerID).update({
+        'funds': liabilities,
+      });
+      // await Get.put(HomeScreenController()).setTotal();
+      Get.back();
+
+  }
+
   Stream<double> calculateTotalTotalGiftFundsListener(String borrowerId) async* {
     String userId = borrowerId;
     var userRef = FirebaseFirestore.instance.collection('users').doc(userId);
@@ -884,7 +957,7 @@ class FirestoreService extends GetxService {
     });
     // Get.put(HomeScreenController()).setTotal();
   }
-  addLiability(String selectedAddedBy,String borrowerId,String liabilityName, String monthlyAmount, String selectedLiabilityType, String balanceAmount, String monthRemaining, String verifyStatus, String selectedExcludedReason, String addedByName) async {
+  addLiability(String selectedAddedBy,String borrowerId,String liabilityName, String monthlyAmount, String selectedLiabilityType, String balanceAmount, String monthRemaining, String verifyStatus, String selectedExcludedReason, String addedByName, bool idoKnow, bool idoNotKnow) async {
     await firestore
         .collection('users')
         .doc(borrowerId)
@@ -902,11 +975,40 @@ class FirestoreService extends GetxService {
           'executionReason':selectedExcludedReason,
           'timestamp':DateTime.now(),
           'addedByName':addedByName,
+          'iKnow':idoKnow,
+          'iDoNotKnow':idoNotKnow,
         }
       ])
     });
     // Get.put(HomeScreenController()).setTotal();
     Get.back();
+  }
+  Future<void> updateLiabilityValues(int index, String selectedAddedBy,String borrowerId,String liabilityName, String monthlyAmount, String selectedLiabilityType, String balanceAmount, String monthRemaining, String verifyStatus, String selectedExcludedReason, bool idoKnow, bool idoNotKnow) async {
+    CollectionReference usersCollection =
+    FirebaseFirestore.instance.collection('users');
+
+    DocumentSnapshot<Object?> snapshot =
+    await usersCollection.doc(borrowerId).get();
+
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+    List<dynamic> liabilities = data['liability'];
+    liabilities[index]['addedBy'] = selectedAddedBy;
+    liabilities[index]['name'] = liabilityName;
+    liabilities[index]['type'] = selectedLiabilityType;
+    liabilities[index]['balanceAmount'] = balanceAmount;
+    liabilities[index]['monthRemaining'] = monthRemaining;
+    liabilities[index]['monthlyAmount'] = monthlyAmount;
+    liabilities[index]['verifyStatus'] = verifyStatus;
+    liabilities[index]['executionReason'] = selectedExcludedReason;
+    liabilities[index]['iKnow'] = idoKnow;
+    liabilities[index]['iDoNotKnow'] = idoNotKnow;
+
+    await usersCollection.doc(borrowerId).update({
+      'liability': liabilities,
+    });
+    Get.back();
+    // Get.put(HomeScreenController()).setTotal();
+
   }
   Future<void> updateFundStatus(String borrowerId,int index, String newStatus) async {
     String userId = borrowerId;
@@ -935,5 +1037,461 @@ class FirestoreService extends GetxService {
   }
   getCoBorrower(String phoneNumber){
     return FirebaseFirestore.instance.collection('CoBorrowers').where('borrowerPhoneNumber',isEqualTo: phoneNumber).snapshots();
+  }
+  Stream<DocumentSnapshot> getCoBorrowerFICO(String coBorrowerId) async* {
+    yield* FirebaseFirestore.instance
+        .collection('users')
+        .doc(coBorrowerId)
+        .snapshots();
+  }
+  Stream<double> calculateTotalIncludedCoBorrowerIncomeListener(String coBorrowerId) async* {
+    var userRef = FirebaseFirestore.instance.collection('users').doc(coBorrowerId);
+    var userSnapshotStream = userRef.snapshots();
+
+    await for (var snapshot in userSnapshotStream) {
+      if (!snapshot.exists || snapshot.data() == null) {
+        yield 0.0;
+        continue;
+      }
+
+      List<dynamic>? incomes = snapshot.data()!['incomes'];
+      if (incomes == null || incomes.isEmpty) {
+        yield 0.0;
+        continue;
+      }
+
+      double totalAmount = 0.0;
+      for (var income in incomes) {
+        String? addedBy = income['addedBy'];
+        String? status = income['status'];
+        String? monthlyAmountStr = income['monthlyIncome']?.toString();
+        if (addedBy != null && status != null && monthlyAmountStr != null){
+          if (addedBy == 'customer' && status == 'Include' || income['type'] == 'business'&& status == 'Exclude'  && income['greaterOrLessThen2Years'] == 'false' && income['includeIt'] == true){
+            double amount = double.tryParse(monthlyAmountStr) ?? 0.0;
+            totalAmount += amount;
+          }
+        }
+      }
+      yield double.parse(totalAmount.toStringAsFixed(2));
+    }
+  }
+  Stream<double> calculateTotalCoBorrowerIncludedLiabilityListener(String coBorrowerId) async* {
+    var userRef = FirebaseFirestore.instance.collection('users').doc(coBorrowerId);
+    var userSnapshotStream = userRef.snapshots();
+
+    await for (var snapshot in userSnapshotStream) {
+      if (!snapshot.exists || snapshot.data() == null) {
+        yield 0.0;
+        continue;
+      }
+
+      List<dynamic>? liabilities = snapshot.data()!['liability'];
+      if (liabilities == null || liabilities.isEmpty) {
+        yield 0.0;
+        continue;
+      }
+
+      double totalAmount = 0.0;
+      for (var liability in liabilities) {
+        String? addedBy = liability['addedBy'];
+        String? status = liability['status'];
+        String? monthlyAmountStr = liability['monthlyAmount']?.toString();
+        if (addedBy != null && status != null && monthlyAmountStr != null){
+          if (addedBy == 'customer' && status == "Include"){
+            double amount = double.tryParse(monthlyAmountStr) ?? 0.0;
+            totalAmount += amount;
+          }
+        }
+      }
+      yield double.parse(totalAmount.toStringAsFixed(2));
+    }
+  }
+  Stream<double> calculateTotalVerifiedCoBorrowerIncomesListener(String coBorrowerId) async* {
+    var userRef = FirebaseFirestore.instance.collection('users').doc(coBorrowerId);
+    var userSnapshotStream = userRef.snapshots();
+
+    await for (var snapshot in userSnapshotStream) {
+      if (!snapshot.exists || snapshot.data() == null) {
+        yield 0.0;
+        continue;
+      }
+
+      List<dynamic>? liabilities = snapshot.data()!['incomes'];
+      if (liabilities == null || liabilities.isEmpty) {
+        yield 0.0;
+        continue;
+      }
+
+      double totalAmount = 0.0;
+      for (var liability in liabilities) {
+        String? addedBy = liability['addedBy'];
+        String? verifyStatus = liability['verifyStatus'];
+        String? monthlyAmountStr = liability['monthlyIncome']?.toString();
+        if (addedBy != null && verifyStatus != null && monthlyAmountStr != null){
+          if (addedBy == 'processor' && verifyStatus == "Verified"){
+            double amount = double.tryParse(monthlyAmountStr) ?? 0.0;
+            totalAmount += amount;
+          }
+        }
+      }
+      yield double.parse(totalAmount.toStringAsFixed(2));
+    }
+  }
+  Stream<double> calculateTotalCoBorrowerVerifiedLiabilityListener(String coBorrowerId) async* {
+    var userRef = FirebaseFirestore.instance.collection('users').doc(coBorrowerId);
+    var userSnapshotStream = userRef.snapshots();
+
+    await for (var snapshot in userSnapshotStream) {
+      if (!snapshot.exists || snapshot.data() == null) {
+        yield 0.0;
+        continue;
+      }
+
+      List<dynamic>? liabilities = snapshot.data()!['liability'];
+      if (liabilities == null || liabilities.isEmpty) {
+        yield 0.0;
+        continue;
+      }
+
+      double totalAmount = 0.0;
+      for (var liability in liabilities) {
+        String? addedBy = liability['addedBy'];
+        String? verifyStatus = liability['verifyStatus'];
+        String? monthlyAmountStr = liability['monthlyAmount']?.toString();
+        if (addedBy != null && verifyStatus != null && monthlyAmountStr != null){
+          if (addedBy == 'processor' && verifyStatus == "Verified"){
+            double amount = double.tryParse(monthlyAmountStr) ?? 0.0;
+            totalAmount += amount;
+          }
+        }
+      }
+      yield double.parse(totalAmount.toStringAsFixed(2));
+    }
+  }
+  addIncomeManual(String addedBy,String verifyStatus,String borrowerId,String companyName, String grossAnnualIncome, String monthlyIncome, String startDate, String endDate, String employerIncomeType, String baseYear, String w2year, String priorW2Year, String addedByName)async{
+    await firestore
+        .collection('users')
+        .doc(borrowerId)
+        .update({
+      'incomes': FieldValue.arrayUnion([
+        {
+          'type':'income',
+          'addedBy':addedBy,
+          'companyName': companyName,
+          'grossAnnualIncome': grossAnnualIncome,
+          'monthlyIncome': monthlyIncome,
+          'startDate': startDate,
+          'endDate': endDate,
+          'status':'Include',
+          'addedType': 'manual',
+          'employerIncomeType': employerIncomeType,
+          'timestamp':DateTime.now(),
+          'salaryCycle':'Monthly',
+          'baseYear':baseYear,
+          'w2Year':w2year,
+          'priorW2Year':priorW2Year,
+          'verifyStatus':verifyStatus,
+          'addedByName':addedByName
+        }
+      ])
+    });
+    // Get.put(HomeScreenController()).setTotal();
+    Get.back();
+    Get.back();
+  }
+  addBusinessManual(String borrowerId,String businessName, String netProfitLoss, String monthlyIncome, String startDate, String businessIncomeType,String currentlyActive, String baseYear, String w2year, String priorW2Year, String businessStartDateStamp, String greaterOrLessThen2Years, String addedBy, String verifyStatus, String addedByName)async{
+    await firestore
+        .collection('users')
+        .doc(borrowerId)
+        .update({
+      'incomes': FieldValue.arrayUnion([
+        {
+          'type':'business',
+          'addedBy':addedBy,
+          'addedByName':addedByName,
+          'companyName': businessName,
+          'grossAnnualIncome': netProfitLoss,
+          'monthlyIncome': monthlyIncome,
+          'startDate': startDate,
+          'currentlyActive': currentlyActive,
+          'status':currentlyActive == 'true' && greaterOrLessThen2Years ==  'true'?'Include':'Exclude',
+          'addedType': 'manual',
+          'employerIncomeType': businessIncomeType,
+          'timestamp':DateTime.now(),
+          'salaryCycle':'Monthly',
+          'baseYear':baseYear,
+          'w2Year':w2year,
+          'priorW2Year':priorW2Year,
+          'businessStartDateStamp':businessStartDateStamp,
+          'greaterOrLessThen2Years':greaterOrLessThen2Years,
+          'includeIt':greaterOrLessThen2Years ==  'true'?true:false,
+          'verifyStatus':verifyStatus
+        }
+      ])
+    });
+    // Get.put(HomeScreenController()).setTotal();
+    Get.back();
+    Get.back();
+  }
+  Future<double> getDepreciationRateForLatestYear(String year) async {
+    double rate = 0.0;
+    try {
+      QuerySnapshot querySnapshot =
+      await firestore.collection('depreciationRates').where('year', isEqualTo: year).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        rate =double.parse(querySnapshot.docs.first['rate']) ;
+      }
+    } catch (e) {
+      print('Error fetching depreciation rate: $e');
+    }
+    return rate;
+  }
+  Future<double> getDepreciationRateForPriorYear(String year) async {
+    double rate = 0.0;
+    try {
+      QuerySnapshot querySnapshot =
+      await firestore.collection('depreciationRates').where('year', isEqualTo: year).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        rate =double.parse(querySnapshot.docs.first['rate']);
+      }
+    } catch (e) {
+      print('Error fetching depreciation rate: $e');
+    }
+    return rate;
+  }
+
+  addFixedIncomeCalculator(String borrowerId,String employerName, String employerStartDate, String employerEndDate, String dateOfPayCheck, String payPeriodEndDate, String salaryCycle, String payRatePerCycle, String baseIncomeYearToDate, String latestYearsW2Box5Income, String priorYearsW2Box5Income, String additionalW2IncomeTypes, double baseOverTime, double w2overTime, double priorW2OverTime, double baseBonus, double w2bonus, double priorW2Bonus, double baseCommission, double w2commission, double priorW2Commission, double baseTips, double w2tips, double priorW2Tips, double baseOthers, double w2others, double priorW2Others, String incomeType, String calculatedMonthlyIncomeFixed, String totalOverTime, String totalBonus, String totalCommission, String totalTips, String totalOthers, String summaryTotalSample, String baseYear, String w2Year, String priorW2Year, String selectedPayPeriodEndDateDay, String selectedPayPeriodEndDateMonth, String verifyStatus, String selectedAddedBy)async{
+    if(additionalW2IncomeTypes != 'true'){
+      await firestore
+          .collection('users')
+          .doc(await borrowerId)
+          .update({
+        'incomes': FieldValue.arrayUnion([
+          {
+            'type':'income',
+            'addedBy':selectedAddedBy,
+            'companyName': employerName,
+            'startDate': employerStartDate,
+            'endDate': employerEndDate,
+            'dateOfPayCheck':dateOfPayCheck,
+            'payPeriodEndDate':payPeriodEndDate,
+            'salaryCycle':salaryCycle,
+            'additionalW2IncomeTypesAdded':additionalW2IncomeTypes,
+            'grossAnnualIncome':payRatePerCycle,
+            'monthlyIncome': summaryTotalSample,
+            // 'payRatePerCycle':payRatePerCycle,
+            'baseIncomeYearToDate':baseIncomeYearToDate,
+            'latestYearsW2Box5Income':latestYearsW2Box5Income,
+            'priorYearsW2Box5Income':priorYearsW2Box5Income,
+            'status':'Include',
+            'addedType': 'calculator',
+            'employerIncomeType': incomeType,
+            'timestamp':DateTime.now(),
+            'baseYear':baseYear,
+            'w2Year':w2Year,
+            'priorW2Year':priorW2Year,
+            'selectedPayPeriodEndDateDay':selectedPayPeriodEndDateDay,
+            'selectedPayPeriodEndDateMonth':selectedPayPeriodEndDateMonth,
+            'verifyStatus':verifyStatus
+
+          }
+        ])
+      });
+      // Get.put(HomeScreenController()).setTotal();
+      Get.back();
+      Get.back();
+    }else{
+      await firestore
+          .collection('users')
+          .doc(borrowerId)
+          .update({
+        'incomes': FieldValue.arrayUnion([
+          {
+            'type':'income',
+            'addedBy':selectedAddedBy,
+            'companyName': employerName,
+            'startDate': employerStartDate,
+            'endDate': employerEndDate,
+            'dateOfPayCheck':dateOfPayCheck,
+            'payPeriodEndDate':payPeriodEndDate,
+            'salaryCycle':salaryCycle,
+            'additionalW2IncomeTypesAdded':additionalW2IncomeTypes,
+            'grossAnnualIncome':payRatePerCycle,
+            'monthlyIncome': calculatedMonthlyIncomeFixed,
+            // 'payRatePerCycle':payRatePerCycle,
+            'baseIncomeYearToDate':baseIncomeYearToDate,
+            'latestYearsW2Box5Income':latestYearsW2Box5Income,
+            'priorYearsW2Box5Income':priorYearsW2Box5Income,
+            'status':'Include',
+            'addedType': 'calculator',
+            'employerIncomeType': incomeType,
+            'timestamp':DateTime.now(),
+            'baseOvertime':baseOverTime,
+            'w2Overtime':w2overTime,
+            'priorW2Overtime':priorW2OverTime,
+            'baseBonus':baseBonus,
+            'w2Bonus':w2bonus,
+            'priorW2Bonus':priorW2Bonus,
+            'baseCommission':baseCommission,
+            'w2Commission':w2commission,
+            'priorW2Commission':priorW2Commission,
+            'baseTip':baseTips,
+            'w2Tip':w2tips,
+            'priorW2Tip':priorW2Tips,
+            'baseOther':baseOthers,
+            'w2Other':w2others,
+            'priorW2Other':priorW2Others,
+            'baseYear':baseYear,
+            'w2Year':w2Year,
+            'priorW2Year':priorW2Year,
+            'selectedPayPeriodEndDateDay':selectedPayPeriodEndDateDay,
+            'selectedPayPeriodEndDateMonth':selectedPayPeriodEndDateMonth,
+            'verifyStatus':verifyStatus
+          }
+        ])
+      });
+      // Get.put(HomeScreenController()).setTotal();
+      Get.back();
+      Get.back();
+    }
+  }
+  addVariableIncomeCalculator(String borrowerId,String employerName, String employerStartDate, String employerEndDate, String payPeriodEndDate, String salaryCycle, String payRatePerCycle, double baseIncome, double w2income, double priorW2Income, double baseOverTime, double w2overTime, double priorW2OverTime, double baseBonus, double w2bonus, double priorW2Bonus, double baseCommission, double w2commission, double priorW2Commission, double baseTips, double w2tips, double priorW2Tips, double baseOthers, double w2others, double priorW2Others, String summaryTotal, String incomeType, String baseYear, String w2Year, String priorW2Year, String selectedPayPeriodEndDateMonth, String selectedPayPeriodEndDateDay, String verifyStatus, String selectedAddedBy)async{
+    await firestore
+        .collection('users')
+        .doc(borrowerId)
+        .update({
+      'incomes': FieldValue.arrayUnion([
+        {
+          'type':'income',
+          'addedBy':selectedAddedBy,
+          'companyName': employerName,
+          'startDate': employerStartDate,
+          'endDate': employerEndDate,
+          'payPeriodEndDate':payPeriodEndDate,
+          'salaryCycle':salaryCycle,
+          'grossAnnualIncome':payRatePerCycle,
+          'monthlyIncome': summaryTotal,
+          'status':'Include',
+          'addedType': 'calculator',
+          'employerIncomeType': incomeType,
+          'timestamp':DateTime.now(),
+          'baseIncome':baseIncome,
+          'w2Income':w2income,
+          'priorW2Income':priorW2Income,
+          'baseOvertime':baseOverTime,
+          'w2Overtime':w2overTime,
+          'priorW2Overtime':priorW2OverTime,
+          'baseBonus':baseBonus,
+          'w2Bonus':w2bonus,
+          'priorW2Bonus':priorW2Bonus,
+          'baseCommission':baseCommission,
+          'w2Commission':w2commission,
+          'priorW2Commission':priorW2Commission,
+          'baseTip':baseTips,
+          'w2Tip':w2tips,
+          'priorW2Tip':priorW2Tips,
+          'baseOther':baseOthers,
+          'w2Other':w2others,
+          'priorW2Other':priorW2Others,
+          'baseYear':baseYear,
+          'w2Year':w2Year,
+          'priorW2Year':priorW2Year,
+          'selectedPayPeriodEndDateDay':selectedPayPeriodEndDateDay,
+          'selectedPayPeriodEndDateMonth':selectedPayPeriodEndDateMonth,
+          'verifyStatus':verifyStatus
+        }
+      ])
+    });
+    // Get.put(HomeScreenController()).setTotal();
+    Get.back();
+    Get.back();
+  }
+  addScheduleCBusinessIncomeCalculator(
+      String borrowerId,
+      String nameOfProprietor,
+      String principalBusinessOrProfession,
+      String businessNameType,
+      String businessStartDate,
+      String incomeType,
+      String currentlyActive,
+      String netProfitLossPrior,
+      String nonRecurringPrior,
+      String depletionPrior,
+      String depreciationPrior,
+      String mealsAndEntertainmentExclusionPrior,
+      String businessUseOfHomePrior,
+      String amortizationCasualtyLossOneTimeExpensePrior,
+      String businessMilesPrior,
+      String netProfitLossRecent,
+      String nonRecurringRecent,
+      String depletionRecent,
+      String depreciationRecent,
+      String mealsAndEntertainmentExclusionRecent,
+      String businessUseOfHomeRecent,
+      String amortizationCasualtyLossOneTimeExpenseRecent,
+      String businessMilesRecent,
+      String numberOfMonths,
+      String baseYear,
+      String w2year,
+      String priorW2Year,
+      String businessStartDateStamp,
+      String greaterOrLessThen2Years, double subtotalPrior, double subtotalRecent, double monthlyIncome, String verifyStatus, String selectedAddedBy
+      )async{
+    await firestore
+        .collection('users')
+        .doc(borrowerId)
+        .update({
+      'incomes': FieldValue.arrayUnion([
+        {
+          'type':'business',
+          'addedBy':selectedAddedBy,
+          'nameOfProprietor': nameOfProprietor,
+          'principalBusinessOrProfession': principalBusinessOrProfession,
+          'companyName': businessNameType,
+          'netProfitLossPrior': netProfitLossPrior,
+          'nonRecurringPrior': nonRecurringPrior,
+          'depletionPrior': depletionPrior,
+          'depreciationPrior': depreciationPrior,
+          'mealsAndEntertainmentExclusionPrior': mealsAndEntertainmentExclusionPrior,
+          'businessUseOfHomePrior': businessUseOfHomePrior,
+          'amortizationCasualtyLossOneTimeExpensePrior': amortizationCasualtyLossOneTimeExpensePrior,
+          'businessMilesPrior': businessMilesPrior,
+          'netProfitLossRecent': netProfitLossRecent,
+          'nonRecurringRecent': nonRecurringRecent,
+          'depletionRecent': depletionRecent,
+          'depreciationRecent': depreciationRecent,
+          'mealsAndEntertainmentExclusionRecent': mealsAndEntertainmentExclusionRecent,
+          'businessUseOfHomeRecent': businessUseOfHomeRecent,
+          'amortizationCasualtyLossOneTimeExpenseRecent': amortizationCasualtyLossOneTimeExpenseRecent,
+          'businessMilesRecent': businessMilesRecent,
+          'numberOfMonths': numberOfMonths,
+          'grossAnnualIncome': '${subtotalRecent + subtotalPrior}'.toString(),
+          'monthlyIncome': monthlyIncome.toString(),
+          'startDate': businessStartDate,
+          'currentlyActive': currentlyActive,
+          'status':currentlyActive == 'true' && greaterOrLessThen2Years ==  'true'?'Include':'Exclude',
+          'addedType': 'calculator',
+          'employerIncomeType': incomeType,
+          'timestamp':DateTime.now(),
+          'salaryCycle':'Monthly',
+          'baseYear':baseYear,
+          'w2Year':w2year,
+          'priorW2Year':priorW2Year,
+          'businessStartDateStamp':businessStartDateStamp,
+          'greaterOrLessThen2Years':greaterOrLessThen2Years,
+          'includeIt':greaterOrLessThen2Years ==  'true'?true:false,
+          'verifyStatus':verifyStatus
+        }
+      ])
+    });
+    Get.back();
+    Get.back();
+  }
+
+  historyDataAdd(String message)async{
+    await firestore.collection('History').add({
+      'message':message,
+      'timestamp':DateTime.now()
+    });
   }
 }

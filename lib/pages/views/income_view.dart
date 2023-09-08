@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:get/get.dart';
 import 'package:zapa_mortgage_admin_web/controllers/income_view_controller.dart';
+import 'package:zapa_mortgage_admin_web/utils/dialogs/add_income_dialog.dart';
 
 import '../../res/app_colors.dart';
 import '../../services/firestore_service.dart';
@@ -43,7 +44,7 @@ class IncomeView extends GetView<IncomeViewController>{
                         alignment: Alignment.centerRight,
                         child: InkWell(
                           onTap: (){
-                            // LiabilityDialog().addLiabilityDialog(borrowerId);
+                            AddIncomeDialog().addIncomeDialog(borrowerId);
                           },
                           child: Container(
                             height: Get.height * 1,
@@ -245,7 +246,7 @@ class IncomeView extends GetView<IncomeViewController>{
                             crossAxisCount: 2, // Display two items in each row
                             mainAxisSpacing: 10.0, // Spacing between rows
                             crossAxisSpacing: 10.0, // Spacing between columns
-                            childAspectRatio: 4 / 1.68,
+                            childAspectRatio: 4 / 1.4,
                           ),
                           itemCount: incomes.length,
                           shrinkWrap: true,
@@ -263,8 +264,9 @@ class IncomeView extends GetView<IncomeViewController>{
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    Row(
+                                    Row (
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
@@ -291,7 +293,7 @@ class IncomeView extends GetView<IncomeViewController>{
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.bold,
                                                 fontColor: income['status'] == 'Include'?AppColors.textColorGreen2:AppColors.errorTextColor,
-                                                textAlign: TextAlign.center).paddingOnly(left: Get.width * .04):
+                                                textAlign: TextAlign.center).paddingOnly(left: Get.width * .01):
                                             Stack(
                                               children: [
                                                 TextWidget(
@@ -299,7 +301,7 @@ class IncomeView extends GetView<IncomeViewController>{
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.bold,
                                                     fontColor: income['status'] == 'Include'?AppColors.textColorGreen2:AppColors.errorTextColor,
-                                                    textAlign: TextAlign.center).paddingOnly(left: Get.width * .04),
+                                                    textAlign: TextAlign.center).paddingOnly(left: Get.width * .01),
                                                 income['includeIt'] == true ? Positioned(
                                                   top: Get.height * 0.011,
                                                   left: Get.width * 0.040,
@@ -880,276 +882,278 @@ class IncomeView extends GetView<IncomeViewController>{
 
                                       ],
                                     ).paddingOnly(top: Get.height * .008,bottom: Get.height * .01),
-                                    income['addedType'] == 'manual'? Row(
-                                      children: [
-                                        const Expanded(
-                                            flex: 6,
-                                            child: Text('You have added this income manually. If you want to add details of this income you can use calculator:',
-                                              style: TextStyle(fontSize: 12),)),
-                                        Expanded(
-                                          flex: 4,
-                                          child: GestureDetector(
-                                            onTap: (){
-                                              // if(income['employerIncomeType'] == 'Fixed Income'){
-                                              //   Get.toNamed(RouteName.editFixedScreen,arguments: {
-                                              //     'additionalW2IncomeTypesAdded':income['additionalW2IncomeTypesAdded'] ?? 'false',
-                                              //     'baseOvertime': income['baseOvertime'] ?? '0.0',
-                                              //     'baseBonus':income['baseBonus'] ?? '0.0',
-                                              //     'baseCommission':income['baseCommission'] ?? '0.0',
-                                              //     'baseIncomeYearToDate':income['baseIncomeYearToDate'] ?? '0.0',
-                                              //     'baseOther':income['baseOther'] ?? '0.0',
-                                              //     'baseTip':income['baseTip'] ?? '0.0',
-                                              //     'baseYear':income['baseYear'] ?? '',
-                                              //     'companyName':income['companyName'],
-                                              //     'dateOfPayCheck':income['dateOfPayCheck'] ?? '',
-                                              //     'employerIncomeType':income['employerIncomeType'],
-                                              //     'endDate':income['endDate'],
-                                              //     'grossAnnualIncome':income['monthlyIncome'],
-                                              //     'latestYearsW2Box5Income':income['latestYearsW2Box5Income'] ?? '0.0',
-                                              //     'monthlyIncome':income['monthlyIncome'],
-                                              //     'payPeriodEndDate':income['payPeriodEndDate'] ?? '',
-                                              //     'priorW2Bonus':income['priorW2Bonus'] ?? '0.0',
-                                              //     'priorW2Commission':income['priorW2Commission'] ?? '0.0',
-                                              //     'priorW2Other':income['priorW2Other'] ?? '0.0',
-                                              //     'priorW2Overtime':income['priorW2Overtime'] ?? '0.0',
-                                              //     'priorW2Tip':income['priorW2Tip'] ?? '0.0',
-                                              //     'priorW2Year':income['priorW2Year'] ?? '',
-                                              //     'priorYearsW2Box5Income':income['priorYearsW2Box5Income'] ?? '0.0',
-                                              //     'salaryCycle':income['salaryCycle'],
-                                              //     'startDate':income['startDate'],
-                                              //     'w2Bonus':income['w2Bonus'] ?? '0.0',
-                                              //     'w2Commission':income['w2Commission'] ?? '0.0',
-                                              //     'w2Other':income['w2Other'] ?? '0.0',
-                                              //     'w2Overtime':income['w2Overtime'] ?? '0.0',
-                                              //     'w2Tip':income['w2Tip'] ?? '0.0',
-                                              //     'w2Year':income['w2Year'] ?? '',
-                                              //     'selectedPayPeriodEndDateDay':income['selectedPayPeriodEndDateDay'] ?? '0',
-                                              //     'selectedPayPeriodEndDateMonth':income['selectedPayPeriodEndDateMonth'] ?? '0',
-                                              //     'index':index.toString(),
-                                              //   });
-                                              //
-                                              // }
-                                              // else if(income['employerIncomeType'] == 'Variable Income'){
-                                              //   Get.toNamed(RouteName.editVariableScreen,arguments: {
-                                              //     'addedBy':income['addedBy'],
-                                              //     'addedType':income['addedType'],
-                                              //     'baseBonus':income['baseBonus'] ?? '0.0',
-                                              //     'baseCommission':income['baseCommission'] ?? '0.0',
-                                              //     'baseIncome':income['baseIncome'] ?? '0.0',
-                                              //     'baseOther':income['baseOther'] ?? '0.0',
-                                              //     'baseOvertime':income['baseOvertime'] ?? '0.0',
-                                              //     'baseTip':income['baseTip'] ?? '0.0',
-                                              //     'companyName':income['companyName'],
-                                              //     'employerIncomeType':income['employerIncomeType'],
-                                              //     'endDate':income['endDate'],
-                                              //     'grossAnnualIncome':income['monthlyIncome'],
-                                              //     'monthlyIncome':income['monthlyIncome'],
-                                              //     'payPeriodEndDate':income['payPeriodEndDate'],
-                                              //     'priorW2Bonus':income['priorW2Bonus'] ?? '0.0',
-                                              //     'priorW2Commission':income['priorW2Commission'] ?? '0.0',
-                                              //     'priorW2Income':income['priorW2Income'] ?? '0.0',
-                                              //     'priorW2Other':income['priorW2Other'] ?? '0.0',
-                                              //     'priorW2Overtime':income['priorW2Overtime'] ?? '0.0',
-                                              //     'priorW2Tip':income['priorW2Tip'] ?? '0.0',
-                                              //     'salaryCycle':income['salaryCycle'],
-                                              //     'startDate':income['startDate'],
-                                              //     'status':income['status'],
-                                              //     'w2Bonus':income['w2Bonus'] ?? '0.0',
-                                              //     'w2Commission':income['w2Commission'] ?? '0.0',
-                                              //     'w2Income':income['w2Income'] ?? '0.0',
-                                              //     'w2Other':income['w2Other'] ?? '0.0',
-                                              //     'w2Overtime':income['w2Overtime'] ?? '0.0',
-                                              //     'w2Tip':income['w2Tip'] ?? '0.0',
-                                              //     'baseYear':income['baseYear'],
-                                              //     'w2Year':income['w2Year'],
-                                              //     'priorW2Year':income['priorW2Year'],
-                                              //     'selectedPayPeriodEndDateDay':income['selectedPayPeriodEndDateDay'] ?? '0',
-                                              //     'selectedPayPeriodEndDateMonth':income['selectedPayPeriodEndDateMonth'] ?? '0',
-                                              //     'index':index.toString(),
-                                              //   });
-                                              // }
-                                              // else if(income['employerIncomeType'] == 'Form 1040 & Sch C'){
-                                              //   Get.toNamed(RouteName.editScheduleCScreen,
-                                              //       arguments: {
-                                              //         'nameOfProprietor':income['nameOfProprietor']??'',
-                                              //         'principalBusinessOrProfession':income['principalBusinessOrProfession']??'',
-                                              //         'companyName':income['companyName'],
-                                              //         'currentlyActive':income['currentlyActive'],
-                                              //         'netProfitLossRecent':income['grossAnnualIncome']??'0.0',
-                                              //         'nonRecurringRecent':income['nonRecurringRecent']??'0.0',
-                                              //         'depletionRecent':income['depletionRecent']??'0.0',
-                                              //         'depreciationRecent':income['depreciationRecent']??'0.0',
-                                              //         'mealsAndEntertainmentExclusionRecent':income['mealsAndEntertainmentExclusionRecent']??'0.0',
-                                              //         'businessUseOfHomeRecent':income['businessUseOfHomeRecent']??'0.0',
-                                              //         'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent']??'0.0',
-                                              //         'businessMilesRecent':income['businessMilesRecent']??'0.0',
-                                              //         'netProfitLossPrior':income['netProfitLossPrior']??'0.0',
-                                              //         'nonRecurringPrior':income['nonRecurringPrior']??'0.0',
-                                              //         'depletionPrior':income['depletionPrior']??'0.0',
-                                              //         'depreciationPrior':income['depreciationPrior']??'0.0',
-                                              //         'mealsAndEntertainmentExclusionPrior':income['mealsAndEntertainmentExclusionPrior']??'0.0',
-                                              //         'businessUseOfHomePrior':income['businessUseOfHomePrior']??'0.0',
-                                              //         'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior']??'0.0',
-                                              //         'businessMilesPrior':income['businessMilesPrior']??'0.0',
-                                              //         'numberOfMonths':income['numberOfMonths']??'12.0',
-                                              //         'baseYear':income['baseYear'],
-                                              //         'w2Year':income['w2Year'],
-                                              //         'priorW2Year':income['priorW2Year'],
-                                              //         'businessStartDateStamp':income['businessStartDateStamp'],
-                                              //         'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
-                                              //         'startDate':income['startDate'],
-                                              //         'index':index.toString(),
-                                              //       });
-                                              // }
-                                              // else if(income['employerIncomeType'] == 'Form 1065 & K1'){
-                                              //   Get.toNamed(RouteName.edit1040K11065Screen,
-                                              //       arguments: {
-                                              //         'nameOfPartnerShip':income['nameOfPartnerShip']??'',
-                                              //         'principalBusinessActivity':income['principalBusinessActivity']??'',
-                                              //         'principalProductOrService':income['principalProductOrService']??'',
-                                              //         'companyName':income['companyName'],
-                                              //         'startDate':income['startDate'],
-                                              //         'currentlyActive':income['currentlyActive'],
-                                              //         'w2IncomeFromSelfEmploymentRecent':income['w2IncomeFromSelfEmploymentRecent']??'0.0',
-                                              //         'w2IncomeFromSelfEmploymentPrior':income['w2IncomeFromSelfEmploymentPrior']??'0.0',
-                                              //         'ordinaryIncomeLossRecent':income['ordinaryIncomeLossRecent']??'0.0',
-                                              //         'guaranteedPaymentToPartnerRecent':income['guaranteedPaymentToPartnerRecent']??'0.0',
-                                              //         'ordinaryIncomeLossPrior':income['ordinaryIncomeLossPrior']??'0.0',
-                                              //         'guaranteedPaymentToPartnerPrior':income['guaranteedPaymentToPartnerPrior']??'0.0',
-                                              //         'ordinaryIncomeLossFromOtherPartnershipRecent':income['grossAnnualIncome']??'0.0',
-                                              //         'nonRecurringOtherIncomeLossRecent':income['nonRecurringOtherIncomeLossRecent']??'0.0',
-                                              //         'depreciationRecent':income['depreciationRecent']??'0.0',
-                                              //         'depletionRecent':income['depletionRecent']??'0.0',
-                                              //         'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent']??'0.0',
-                                              //         'mortgagePayableInLessThanOneYearRecent':income['mortgagePayableInLessThanOneYearRecent']??'0.0',
-                                              //         'mealsAndEntertainmentRecent':income['mealsAndEntertainmentRecent']??'0.0',
-                                              //         'ownershipPercentageRecent':income['ownershipPercentageRecent']??'50.0',
-                                              //         'ordinaryIncomeLossFromOtherPartnershipPrior':income['ordinaryIncomeLossFromOtherPartnershipPrior']??'0.0',
-                                              //         'nonRecurringOtherIncomeLossPrior':income['nonRecurringOtherIncomeLossPrior']??'0.0',
-                                              //         'depreciationPrior':income['depreciationPrior']??'0.0',
-                                              //         'depletionPrior':income['depletionPrior']??'0.0',
-                                              //         'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior']??'0.0',
-                                              //         'mortgagePayableInLessThanOneYearPrior':income['mortgagePayableInLessThanOneYearPrior']??'0.0',
-                                              //         'mealsAndEntertainmentPrior':income['mealsAndEntertainmentPrior']??'0.0',
-                                              //         'ownershipPercentagePrior':income['ownershipPercentagePrior']??'0.0',
-                                              //         'addPartnershipReturnsPrior':income['addPartnershipReturnsPrior']??'true',
-                                              //         'addPartnershipReturnsRecent':income['addPartnershipReturnsRecent']??'true',
-                                              //         'numberOfMonths':income['numberOfMonths']??'12.0',
-                                              //         'baseYear':income['baseYear'],
-                                              //         'w2Year':income['w2Year'],
-                                              //         'priorW2Year':income['priorW2Year'],
-                                              //         'businessStartDateStamp':income['businessStartDateStamp'],
-                                              //         'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
-                                              //         'index':index.toString(),
-                                              //       });
-                                              // }
-                                              // else if(income['employerIncomeType'] == 'Form 1120S & K1'){
-                                              //   Get.toNamed(RouteName.edit1040K11120SScreen,
-                                              //       arguments: {
-                                              //         'nameOfPartnerShip':income['nameOfPartnerShip']??'',
-                                              //         'sElectionEffectiveDate':income['sElectionEffectiveDate']??'',
-                                              //         'companyName':income['companyName'],
-                                              //         'startDate':income['startDate'],
-                                              //         'currentlyActive':income['currentlyActive'],
-                                              //         'w2IncomeFromSelfEmploymentRecent':income['w2IncomeFromSelfEmploymentRecent']??'0.0',
-                                              //         'w2IncomeFromSelfEmploymentPrior':income['w2IncomeFromSelfEmploymentPrior']??'0.0',
-                                              //         'ordinaryIncomeLossRecent':income['grossAnnualIncome']??'0.0',
-                                              //         'ordinaryIncomeLossPrior':income['ordinaryIncomeLossPrior']??'0.0',
-                                              //         'nonRecurringOtherIncomeLossRecent':income['nonRecurringOtherIncomeLossRecent']??'0.0',
-                                              //         'depreciationRecent':income['depreciationRecent']??'0.0',
-                                              //         'depletionRecent':income['depletionRecent']??'0.0',
-                                              //         'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent']??'0.0',
-                                              //         'mortgagePayableInLessThanOneYearRecent':income['mortgagePayableInLessThanOneYearRecent']??'0.0',
-                                              //         'mealsAndEntertainmentRecent':income['mealsAndEntertainmentRecent']??'0.0',
-                                              //         'ownershipPercentageRecent':income['ownershipPercentageRecent']??'0.0',
-                                              //         'nonRecurringOtherIncomeLossPrior':income['nonRecurringOtherIncomeLossPrior']??'0.0',
-                                              //         'depreciationPrior':income['depreciationPrior']??'0.0',
-                                              //         'depletionPrior':income['depletionPrior']??'0.0',
-                                              //         'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior']??'0.0',
-                                              //         'mortgagePayableInLessThanOneYearPrior':income['mortgagePayableInLessThanOneYearPrior']??'0.0',
-                                              //         'mealsAndEntertainmentPrior':income['mealsAndEntertainmentPrior']??'0.0',
-                                              //         'ownershipPercentagePrior':income['ownershipPercentagePrior']??'0.0',
-                                              //         'addPartnershipReturnsPrior':income['addPartnershipReturnsPrior']??'true',
-                                              //         'addPartnershipReturnsRecent':income['addPartnershipReturnsRecent']??'true',
-                                              //         'numberOfMonths':income['numberOfMonths']??'12.0',
-                                              //         'baseYear':income['baseYear'],
-                                              //         'w2Year':income['w2Year'],
-                                              //         'priorW2Year':income['priorW2Year'],
-                                              //         'businessStartDateStamp':income['businessStartDateStamp'],
-                                              //         'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
-                                              //         'index':index.toString(),
-                                              //       });
-                                              // }
-                                              // else if(income['employerIncomeType'] == 'Form 1120'){
-                                              //   Get.toNamed(RouteName.edit10401120Screen,
-                                              //       arguments: {
-                                              //         'name':income['name'] ?? '',
-                                              //         'companyName':income['companyName'],
-                                              //         'startDate':income['startDate'],
-                                              //         'currentlyActive':income['currentlyActive'],
-                                              //         'w2IncomeFromSelfEmploymentRecent':income['w2IncomeFromSelfEmploymentRecent'] ?? '0.0',
-                                              //         'w2IncomeFromSelfEmploymentPrior':income['w2IncomeFromSelfEmploymentPrior'] ?? '0.0',
-                                              //         'taxableIncomeRecent':income['grossAnnualIncome'] ?? '0.0',
-                                              //         'totalTaxRecent':income['totalTaxRecent'] ?? '0.0',
-                                              //         'nonRecurringGainLossRecent':income['nonRecurringGainLossRecent'] ?? '0.0',
-                                              //         'nonRecurringOtherIncomeLossRecent':income['nonRecurringOtherIncomeLossRecent'] ?? '0.0',
-                                              //         'depreciationRecent':income['depreciationRecent'] ?? '0.0',
-                                              //         'depletionRecent':income['depletionRecent'] ?? '0.0',
-                                              //         'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent'] ?? '0.0',
-                                              //         'netOperatingLossAndSpecialDeductionsRecent':income['netOperatingLossAndSpecialDeductionsRecent'] ?? '0.0',
-                                              //         'mortgagePayableInLessThanOneYearRecent':income['mortgagePayableInLessThanOneYearRecent'] ?? '0.0',
-                                              //         'mealsAndEntertainmentRecent':income['mealsAndEntertainmentRecent'] ?? '0.0',
-                                              //         'ownershipPercentageRecent':income['ownershipPercentageRecent'] ?? '0.0',
-                                              //         'dividendsPaidToBorrowerRecent':income['dividendsPaidToBorrowerRecent'] ?? '0.0',
-                                              //         'taxableIncomePrior':income['taxableIncomePrior'] ?? '0.0',
-                                              //         'totalTaxPrior':income['totalTaxPrior'] ?? '0.0',
-                                              //         'nonRecurringGainLossPrior':income['nonRecurringGainLossPrior'] ?? '0.0',
-                                              //         'nonRecurringOtherIncomeLossPrior':income['nonRecurringOtherIncomeLossPrior'] ?? '0.0',
-                                              //         'depreciationPrior':income['depreciationPrior'] ?? '0.0',
-                                              //         'depletionPrior':income['depletionPrior'] ?? '0.0',
-                                              //         'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior'] ?? '0.0',
-                                              //         'netOperatingLossAndSpecialDeductionsPrior':income['netOperatingLossAndSpecialDeductionsPrior'] ?? '0.0',
-                                              //         'mortgagePayableInLessThanOneYearPrior':income['mortgagePayableInLessThanOneYearPrior'] ?? '0.0',
-                                              //         'mealsAndEntertainmentPrior':income['mealsAndEntertainmentPrior'] ?? '0.0',
-                                              //         'ownershipPercentagePrior':income['ownershipPercentagePrior'] ?? '0.0',
-                                              //         'dividendsPaidToBorrowerPrior':income['dividendsPaidToBorrowerPrior'] ?? '0.0',
-                                              //         'addPartnershipReturnsPrior':income['addPartnershipReturnsPrior'] ?? 'true',
-                                              //         'addPartnershipReturnsRecent':income['addPartnershipReturnsRecent'] ?? 'true',
-                                              //         'numberOfMonths':income['numberOfMonths'] ?? '12.0',
-                                              //         'baseYear':income['baseYear'],
-                                              //         'w2Year':income['w2Year'],
-                                              //         'priorW2Year':income['priorW2Year'],
-                                              //         'businessStartDateStamp':income['businessStartDateStamp'],
-                                              //         'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
-                                              //         'index':index.toString(),
-                                              //       });
-                                              // }
-
-                                            },
-                                            child: Container(
-                                              height: Get.height * .04,
-                                              decoration: BoxDecoration(
-                                                  color: AppColors.primaryColor,
-                                                  borderRadius: BorderRadius.circular(10)
-                                              ),
-                                              child: const Center(child: Text('Calculator',style: TextStyle(color: AppColors.textColorWhite),)),
-                                            ),
-                                          ),
-                                        )],
-                                    ).paddingOnly(top: Get.height * .01):const Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text('This is income is added by using calculator.',
-                                        style: TextStyle(fontSize: 12),),
-                                    )
+                                    // income['addedType'] == 'manual'? Row(
+                                    //   children: [
+                                    //     const Expanded(
+                                    //         flex: 6,
+                                    //         child: Text('You have added this income manually. If you want to add details of this income you can use calculator:',
+                                    //           style: TextStyle(fontSize: 12),)),
+                                    //     Expanded(
+                                    //       flex: 4,
+                                    //       child: GestureDetector(
+                                    //         onTap: (){
+                                    //           // if(income['employerIncomeType'] == 'Fixed Income'){
+                                    //           //   Get.toNamed(RouteName.editFixedScreen,arguments: {
+                                    //           //     'additionalW2IncomeTypesAdded':income['additionalW2IncomeTypesAdded'] ?? 'false',
+                                    //           //     'baseOvertime': income['baseOvertime'] ?? '0.0',
+                                    //           //     'baseBonus':income['baseBonus'] ?? '0.0',
+                                    //           //     'baseCommission':income['baseCommission'] ?? '0.0',
+                                    //           //     'baseIncomeYearToDate':income['baseIncomeYearToDate'] ?? '0.0',
+                                    //           //     'baseOther':income['baseOther'] ?? '0.0',
+                                    //           //     'baseTip':income['baseTip'] ?? '0.0',
+                                    //           //     'baseYear':income['baseYear'] ?? '',
+                                    //           //     'companyName':income['companyName'],
+                                    //           //     'dateOfPayCheck':income['dateOfPayCheck'] ?? '',
+                                    //           //     'employerIncomeType':income['employerIncomeType'],
+                                    //           //     'endDate':income['endDate'],
+                                    //           //     'grossAnnualIncome':income['monthlyIncome'],
+                                    //           //     'latestYearsW2Box5Income':income['latestYearsW2Box5Income'] ?? '0.0',
+                                    //           //     'monthlyIncome':income['monthlyIncome'],
+                                    //           //     'payPeriodEndDate':income['payPeriodEndDate'] ?? '',
+                                    //           //     'priorW2Bonus':income['priorW2Bonus'] ?? '0.0',
+                                    //           //     'priorW2Commission':income['priorW2Commission'] ?? '0.0',
+                                    //           //     'priorW2Other':income['priorW2Other'] ?? '0.0',
+                                    //           //     'priorW2Overtime':income['priorW2Overtime'] ?? '0.0',
+                                    //           //     'priorW2Tip':income['priorW2Tip'] ?? '0.0',
+                                    //           //     'priorW2Year':income['priorW2Year'] ?? '',
+                                    //           //     'priorYearsW2Box5Income':income['priorYearsW2Box5Income'] ?? '0.0',
+                                    //           //     'salaryCycle':income['salaryCycle'],
+                                    //           //     'startDate':income['startDate'],
+                                    //           //     'w2Bonus':income['w2Bonus'] ?? '0.0',
+                                    //           //     'w2Commission':income['w2Commission'] ?? '0.0',
+                                    //           //     'w2Other':income['w2Other'] ?? '0.0',
+                                    //           //     'w2Overtime':income['w2Overtime'] ?? '0.0',
+                                    //           //     'w2Tip':income['w2Tip'] ?? '0.0',
+                                    //           //     'w2Year':income['w2Year'] ?? '',
+                                    //           //     'selectedPayPeriodEndDateDay':income['selectedPayPeriodEndDateDay'] ?? '0',
+                                    //           //     'selectedPayPeriodEndDateMonth':income['selectedPayPeriodEndDateMonth'] ?? '0',
+                                    //           //     'index':index.toString(),
+                                    //           //   });
+                                    //           //
+                                    //           // }
+                                    //           // else if(income['employerIncomeType'] == 'Variable Income'){
+                                    //           //   Get.toNamed(RouteName.editVariableScreen,arguments: {
+                                    //           //     'addedBy':income['addedBy'],
+                                    //           //     'addedType':income['addedType'],
+                                    //           //     'baseBonus':income['baseBonus'] ?? '0.0',
+                                    //           //     'baseCommission':income['baseCommission'] ?? '0.0',
+                                    //           //     'baseIncome':income['baseIncome'] ?? '0.0',
+                                    //           //     'baseOther':income['baseOther'] ?? '0.0',
+                                    //           //     'baseOvertime':income['baseOvertime'] ?? '0.0',
+                                    //           //     'baseTip':income['baseTip'] ?? '0.0',
+                                    //           //     'companyName':income['companyName'],
+                                    //           //     'employerIncomeType':income['employerIncomeType'],
+                                    //           //     'endDate':income['endDate'],
+                                    //           //     'grossAnnualIncome':income['monthlyIncome'],
+                                    //           //     'monthlyIncome':income['monthlyIncome'],
+                                    //           //     'payPeriodEndDate':income['payPeriodEndDate'],
+                                    //           //     'priorW2Bonus':income['priorW2Bonus'] ?? '0.0',
+                                    //           //     'priorW2Commission':income['priorW2Commission'] ?? '0.0',
+                                    //           //     'priorW2Income':income['priorW2Income'] ?? '0.0',
+                                    //           //     'priorW2Other':income['priorW2Other'] ?? '0.0',
+                                    //           //     'priorW2Overtime':income['priorW2Overtime'] ?? '0.0',
+                                    //           //     'priorW2Tip':income['priorW2Tip'] ?? '0.0',
+                                    //           //     'salaryCycle':income['salaryCycle'],
+                                    //           //     'startDate':income['startDate'],
+                                    //           //     'status':income['status'],
+                                    //           //     'w2Bonus':income['w2Bonus'] ?? '0.0',
+                                    //           //     'w2Commission':income['w2Commission'] ?? '0.0',
+                                    //           //     'w2Income':income['w2Income'] ?? '0.0',
+                                    //           //     'w2Other':income['w2Other'] ?? '0.0',
+                                    //           //     'w2Overtime':income['w2Overtime'] ?? '0.0',
+                                    //           //     'w2Tip':income['w2Tip'] ?? '0.0',
+                                    //           //     'baseYear':income['baseYear'],
+                                    //           //     'w2Year':income['w2Year'],
+                                    //           //     'priorW2Year':income['priorW2Year'],
+                                    //           //     'selectedPayPeriodEndDateDay':income['selectedPayPeriodEndDateDay'] ?? '0',
+                                    //           //     'selectedPayPeriodEndDateMonth':income['selectedPayPeriodEndDateMonth'] ?? '0',
+                                    //           //     'index':index.toString(),
+                                    //           //   });
+                                    //           // }
+                                    //           // else if(income['employerIncomeType'] == 'Form 1040 & Sch C'){
+                                    //           //   Get.toNamed(RouteName.editScheduleCScreen,
+                                    //           //       arguments: {
+                                    //           //         'nameOfProprietor':income['nameOfProprietor']??'',
+                                    //           //         'principalBusinessOrProfession':income['principalBusinessOrProfession']??'',
+                                    //           //         'companyName':income['companyName'],
+                                    //           //         'currentlyActive':income['currentlyActive'],
+                                    //           //         'netProfitLossRecent':income['grossAnnualIncome']??'0.0',
+                                    //           //         'nonRecurringRecent':income['nonRecurringRecent']??'0.0',
+                                    //           //         'depletionRecent':income['depletionRecent']??'0.0',
+                                    //           //         'depreciationRecent':income['depreciationRecent']??'0.0',
+                                    //           //         'mealsAndEntertainmentExclusionRecent':income['mealsAndEntertainmentExclusionRecent']??'0.0',
+                                    //           //         'businessUseOfHomeRecent':income['businessUseOfHomeRecent']??'0.0',
+                                    //           //         'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent']??'0.0',
+                                    //           //         'businessMilesRecent':income['businessMilesRecent']??'0.0',
+                                    //           //         'netProfitLossPrior':income['netProfitLossPrior']??'0.0',
+                                    //           //         'nonRecurringPrior':income['nonRecurringPrior']??'0.0',
+                                    //           //         'depletionPrior':income['depletionPrior']??'0.0',
+                                    //           //         'depreciationPrior':income['depreciationPrior']??'0.0',
+                                    //           //         'mealsAndEntertainmentExclusionPrior':income['mealsAndEntertainmentExclusionPrior']??'0.0',
+                                    //           //         'businessUseOfHomePrior':income['businessUseOfHomePrior']??'0.0',
+                                    //           //         'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior']??'0.0',
+                                    //           //         'businessMilesPrior':income['businessMilesPrior']??'0.0',
+                                    //           //         'numberOfMonths':income['numberOfMonths']??'12.0',
+                                    //           //         'baseYear':income['baseYear'],
+                                    //           //         'w2Year':income['w2Year'],
+                                    //           //         'priorW2Year':income['priorW2Year'],
+                                    //           //         'businessStartDateStamp':income['businessStartDateStamp'],
+                                    //           //         'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
+                                    //           //         'startDate':income['startDate'],
+                                    //           //         'index':index.toString(),
+                                    //           //       });
+                                    //           // }
+                                    //           // else if(income['employerIncomeType'] == 'Form 1065 & K1'){
+                                    //           //   Get.toNamed(RouteName.edit1040K11065Screen,
+                                    //           //       arguments: {
+                                    //           //         'nameOfPartnerShip':income['nameOfPartnerShip']??'',
+                                    //           //         'principalBusinessActivity':income['principalBusinessActivity']??'',
+                                    //           //         'principalProductOrService':income['principalProductOrService']??'',
+                                    //           //         'companyName':income['companyName'],
+                                    //           //         'startDate':income['startDate'],
+                                    //           //         'currentlyActive':income['currentlyActive'],
+                                    //           //         'w2IncomeFromSelfEmploymentRecent':income['w2IncomeFromSelfEmploymentRecent']??'0.0',
+                                    //           //         'w2IncomeFromSelfEmploymentPrior':income['w2IncomeFromSelfEmploymentPrior']??'0.0',
+                                    //           //         'ordinaryIncomeLossRecent':income['ordinaryIncomeLossRecent']??'0.0',
+                                    //           //         'guaranteedPaymentToPartnerRecent':income['guaranteedPaymentToPartnerRecent']??'0.0',
+                                    //           //         'ordinaryIncomeLossPrior':income['ordinaryIncomeLossPrior']??'0.0',
+                                    //           //         'guaranteedPaymentToPartnerPrior':income['guaranteedPaymentToPartnerPrior']??'0.0',
+                                    //           //         'ordinaryIncomeLossFromOtherPartnershipRecent':income['grossAnnualIncome']??'0.0',
+                                    //           //         'nonRecurringOtherIncomeLossRecent':income['nonRecurringOtherIncomeLossRecent']??'0.0',
+                                    //           //         'depreciationRecent':income['depreciationRecent']??'0.0',
+                                    //           //         'depletionRecent':income['depletionRecent']??'0.0',
+                                    //           //         'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent']??'0.0',
+                                    //           //         'mortgagePayableInLessThanOneYearRecent':income['mortgagePayableInLessThanOneYearRecent']??'0.0',
+                                    //           //         'mealsAndEntertainmentRecent':income['mealsAndEntertainmentRecent']??'0.0',
+                                    //           //         'ownershipPercentageRecent':income['ownershipPercentageRecent']??'50.0',
+                                    //           //         'ordinaryIncomeLossFromOtherPartnershipPrior':income['ordinaryIncomeLossFromOtherPartnershipPrior']??'0.0',
+                                    //           //         'nonRecurringOtherIncomeLossPrior':income['nonRecurringOtherIncomeLossPrior']??'0.0',
+                                    //           //         'depreciationPrior':income['depreciationPrior']??'0.0',
+                                    //           //         'depletionPrior':income['depletionPrior']??'0.0',
+                                    //           //         'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior']??'0.0',
+                                    //           //         'mortgagePayableInLessThanOneYearPrior':income['mortgagePayableInLessThanOneYearPrior']??'0.0',
+                                    //           //         'mealsAndEntertainmentPrior':income['mealsAndEntertainmentPrior']??'0.0',
+                                    //           //         'ownershipPercentagePrior':income['ownershipPercentagePrior']??'0.0',
+                                    //           //         'addPartnershipReturnsPrior':income['addPartnershipReturnsPrior']??'true',
+                                    //           //         'addPartnershipReturnsRecent':income['addPartnershipReturnsRecent']??'true',
+                                    //           //         'numberOfMonths':income['numberOfMonths']??'12.0',
+                                    //           //         'baseYear':income['baseYear'],
+                                    //           //         'w2Year':income['w2Year'],
+                                    //           //         'priorW2Year':income['priorW2Year'],
+                                    //           //         'businessStartDateStamp':income['businessStartDateStamp'],
+                                    //           //         'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
+                                    //           //         'index':index.toString(),
+                                    //           //       });
+                                    //           // }
+                                    //           // else if(income['employerIncomeType'] == 'Form 1120S & K1'){
+                                    //           //   Get.toNamed(RouteName.edit1040K11120SScreen,
+                                    //           //       arguments: {
+                                    //           //         'nameOfPartnerShip':income['nameOfPartnerShip']??'',
+                                    //           //         'sElectionEffectiveDate':income['sElectionEffectiveDate']??'',
+                                    //           //         'companyName':income['companyName'],
+                                    //           //         'startDate':income['startDate'],
+                                    //           //         'currentlyActive':income['currentlyActive'],
+                                    //           //         'w2IncomeFromSelfEmploymentRecent':income['w2IncomeFromSelfEmploymentRecent']??'0.0',
+                                    //           //         'w2IncomeFromSelfEmploymentPrior':income['w2IncomeFromSelfEmploymentPrior']??'0.0',
+                                    //           //         'ordinaryIncomeLossRecent':income['grossAnnualIncome']??'0.0',
+                                    //           //         'ordinaryIncomeLossPrior':income['ordinaryIncomeLossPrior']??'0.0',
+                                    //           //         'nonRecurringOtherIncomeLossRecent':income['nonRecurringOtherIncomeLossRecent']??'0.0',
+                                    //           //         'depreciationRecent':income['depreciationRecent']??'0.0',
+                                    //           //         'depletionRecent':income['depletionRecent']??'0.0',
+                                    //           //         'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent']??'0.0',
+                                    //           //         'mortgagePayableInLessThanOneYearRecent':income['mortgagePayableInLessThanOneYearRecent']??'0.0',
+                                    //           //         'mealsAndEntertainmentRecent':income['mealsAndEntertainmentRecent']??'0.0',
+                                    //           //         'ownershipPercentageRecent':income['ownershipPercentageRecent']??'0.0',
+                                    //           //         'nonRecurringOtherIncomeLossPrior':income['nonRecurringOtherIncomeLossPrior']??'0.0',
+                                    //           //         'depreciationPrior':income['depreciationPrior']??'0.0',
+                                    //           //         'depletionPrior':income['depletionPrior']??'0.0',
+                                    //           //         'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior']??'0.0',
+                                    //           //         'mortgagePayableInLessThanOneYearPrior':income['mortgagePayableInLessThanOneYearPrior']??'0.0',
+                                    //           //         'mealsAndEntertainmentPrior':income['mealsAndEntertainmentPrior']??'0.0',
+                                    //           //         'ownershipPercentagePrior':income['ownershipPercentagePrior']??'0.0',
+                                    //           //         'addPartnershipReturnsPrior':income['addPartnershipReturnsPrior']??'true',
+                                    //           //         'addPartnershipReturnsRecent':income['addPartnershipReturnsRecent']??'true',
+                                    //           //         'numberOfMonths':income['numberOfMonths']??'12.0',
+                                    //           //         'baseYear':income['baseYear'],
+                                    //           //         'w2Year':income['w2Year'],
+                                    //           //         'priorW2Year':income['priorW2Year'],
+                                    //           //         'businessStartDateStamp':income['businessStartDateStamp'],
+                                    //           //         'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
+                                    //           //         'index':index.toString(),
+                                    //           //       });
+                                    //           // }
+                                    //           // else if(income['employerIncomeType'] == 'Form 1120'){
+                                    //           //   Get.toNamed(RouteName.edit10401120Screen,
+                                    //           //       arguments: {
+                                    //           //         'name':income['name'] ?? '',
+                                    //           //         'companyName':income['companyName'],
+                                    //           //         'startDate':income['startDate'],
+                                    //           //         'currentlyActive':income['currentlyActive'],
+                                    //           //         'w2IncomeFromSelfEmploymentRecent':income['w2IncomeFromSelfEmploymentRecent'] ?? '0.0',
+                                    //           //         'w2IncomeFromSelfEmploymentPrior':income['w2IncomeFromSelfEmploymentPrior'] ?? '0.0',
+                                    //           //         'taxableIncomeRecent':income['grossAnnualIncome'] ?? '0.0',
+                                    //           //         'totalTaxRecent':income['totalTaxRecent'] ?? '0.0',
+                                    //           //         'nonRecurringGainLossRecent':income['nonRecurringGainLossRecent'] ?? '0.0',
+                                    //           //         'nonRecurringOtherIncomeLossRecent':income['nonRecurringOtherIncomeLossRecent'] ?? '0.0',
+                                    //           //         'depreciationRecent':income['depreciationRecent'] ?? '0.0',
+                                    //           //         'depletionRecent':income['depletionRecent'] ?? '0.0',
+                                    //           //         'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent'] ?? '0.0',
+                                    //           //         'netOperatingLossAndSpecialDeductionsRecent':income['netOperatingLossAndSpecialDeductionsRecent'] ?? '0.0',
+                                    //           //         'mortgagePayableInLessThanOneYearRecent':income['mortgagePayableInLessThanOneYearRecent'] ?? '0.0',
+                                    //           //         'mealsAndEntertainmentRecent':income['mealsAndEntertainmentRecent'] ?? '0.0',
+                                    //           //         'ownershipPercentageRecent':income['ownershipPercentageRecent'] ?? '0.0',
+                                    //           //         'dividendsPaidToBorrowerRecent':income['dividendsPaidToBorrowerRecent'] ?? '0.0',
+                                    //           //         'taxableIncomePrior':income['taxableIncomePrior'] ?? '0.0',
+                                    //           //         'totalTaxPrior':income['totalTaxPrior'] ?? '0.0',
+                                    //           //         'nonRecurringGainLossPrior':income['nonRecurringGainLossPrior'] ?? '0.0',
+                                    //           //         'nonRecurringOtherIncomeLossPrior':income['nonRecurringOtherIncomeLossPrior'] ?? '0.0',
+                                    //           //         'depreciationPrior':income['depreciationPrior'] ?? '0.0',
+                                    //           //         'depletionPrior':income['depletionPrior'] ?? '0.0',
+                                    //           //         'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior'] ?? '0.0',
+                                    //           //         'netOperatingLossAndSpecialDeductionsPrior':income['netOperatingLossAndSpecialDeductionsPrior'] ?? '0.0',
+                                    //           //         'mortgagePayableInLessThanOneYearPrior':income['mortgagePayableInLessThanOneYearPrior'] ?? '0.0',
+                                    //           //         'mealsAndEntertainmentPrior':income['mealsAndEntertainmentPrior'] ?? '0.0',
+                                    //           //         'ownershipPercentagePrior':income['ownershipPercentagePrior'] ?? '0.0',
+                                    //           //         'dividendsPaidToBorrowerPrior':income['dividendsPaidToBorrowerPrior'] ?? '0.0',
+                                    //           //         'addPartnershipReturnsPrior':income['addPartnershipReturnsPrior'] ?? 'true',
+                                    //           //         'addPartnershipReturnsRecent':income['addPartnershipReturnsRecent'] ?? 'true',
+                                    //           //         'numberOfMonths':income['numberOfMonths'] ?? '12.0',
+                                    //           //         'baseYear':income['baseYear'],
+                                    //           //         'w2Year':income['w2Year'],
+                                    //           //         'priorW2Year':income['priorW2Year'],
+                                    //           //         'businessStartDateStamp':income['businessStartDateStamp'],
+                                    //           //         'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
+                                    //           //         'index':index.toString(),
+                                    //           //       });
+                                    //           // }
+                                    //
+                                    //         },
+                                    //         child: Container(
+                                    //           height: Get.height * .04,
+                                    //           decoration: BoxDecoration(
+                                    //               color: AppColors.primaryColor,
+                                    //               borderRadius: BorderRadius.circular(10)
+                                    //           ),
+                                    //           child: const Center(child: Text('Calculator',style: TextStyle(color: AppColors.textColorWhite),)),
+                                    //         ),
+                                    //       ),
+                                    //     )],
+                                    // ).paddingOnly(top: Get.height * .01):const Align(
+                                    //   alignment: Alignment.centerLeft,
+                                    //   child: Text('This is income is added by using calculator.',
+                                    //     style: TextStyle(fontSize: 12),),
+                                    // )
                                   ],
                                 ).paddingAll(8)
                             ).marginOnly(top: 8):Container(
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(10),
-                                    color: AppColors.liabilityItemsBackgroundColor.withOpacity(.4)
+                                    color: AppColors.liabilityItemsBackgroundColor.withOpacity(.4),
+                                  border: Border.all(color: income['verifyStatus'] == 'Verified'?AppColors.primaryColor:AppColors.transparentColor,width: 2)
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1186,28 +1190,364 @@ class IncomeView extends GetView<IncomeViewController>{
                                                 child: Text(income['verifyStatus'],style: TextStyle(fontWeight: FontWeight.bold,
                                                     color: income['verifyStatus'] == 'Verified'?AppColors.greenColor:AppColors.secondaryColor
                                                 ),).paddingSymmetric(horizontal: 4)),
-                                            SizedBox(width: Get.width * .04,),
-                                            InkWell(
-                                              onTap: (){
-
-                                              },
-                                              child: Container(
-                                                  width: Get.width * .16,
-                                                  height: 24,
-                                                  decoration: BoxDecoration(
-                                                      color: AppColors.secondaryColor,
-                                                      borderRadius: BorderRadius.circular(1000)
+                                            SizedBox(width: Get.width * .01,),
+                                            Row(
+                                              children: [
+                                                InkWell(
+                                                  onTap: (){
+                                                    // if(income['employerIncomeType'] == 'Fixed Income'){
+                                                    //   if(income['addedType'] == 'calculator'){
+                                                    //     Get.toNamed(RouteName.editFixedScreen,arguments: {
+                                                    //       'additionalW2IncomeTypesAdded':income['additionalW2IncomeTypesAdded'],
+                                                    //       'baseOvertime': income['baseOvertime'] ?? '0.0',
+                                                    //       'baseBonus':income['baseBonus'] ?? '0.0',
+                                                    //       'baseCommission':income['baseCommission'] ?? '0.0',
+                                                    //       'baseIncomeYearToDate':income['baseIncomeYearToDate'],
+                                                    //       'baseOther':income['baseOther'] ?? '0.0',
+                                                    //       'baseTip':income['baseTip'] ?? '0.0',
+                                                    //       'baseYear':income['baseYear'],
+                                                    //       'companyName':income['companyName'],
+                                                    //       'dateOfPayCheck':income['dateOfPayCheck'],
+                                                    //       'employerIncomeType':income['employerIncomeType'],
+                                                    //       'endDate':income['endDate'],
+                                                    //       'grossAnnualIncome':income['grossAnnualIncome'],
+                                                    //       'latestYearsW2Box5Income':income['latestYearsW2Box5Income'],
+                                                    //       'monthlyIncome':income['monthlyIncome'],
+                                                    //       'payPeriodEndDate':income['payPeriodEndDate'],
+                                                    //       'priorW2Bonus':income['priorW2Bonus'] ?? '0.0',
+                                                    //       'priorW2Commission':income['priorW2Commission'] ?? '0.0',
+                                                    //       'priorW2Other':income['priorW2Other'] ?? '0.0',
+                                                    //       'priorW2Overtime':income['priorW2Overtime'] ?? '0.0',
+                                                    //       'priorW2Tip':income['priorW2Tip'] ?? '0.0',
+                                                    //       'priorW2Year':income['priorW2Year'],
+                                                    //       'priorYearsW2Box5Income':income['priorYearsW2Box5Income'],
+                                                    //       'salaryCycle':income['salaryCycle'],
+                                                    //       'startDate':income['startDate'],
+                                                    //       'w2Bonus':income['w2Bonus'] ?? '0.0',
+                                                    //       'w2Commission':income['w2Commission'] ?? '0.0',
+                                                    //       'w2Other':income['w2Other'] ?? '0.0',
+                                                    //       'w2Overtime':income['w2Overtime'] ?? '0.0',
+                                                    //       'w2Tip':income['w2Tip'] ?? '0.0',
+                                                    //       'w2Year':income['w2Year'],
+                                                    //       'selectedPayPeriodEndDateDay':income['selectedPayPeriodEndDateDay'],
+                                                    //       'selectedPayPeriodEndDateMonth':income['selectedPayPeriodEndDateMonth'],
+                                                    //       'index':index.toString(),
+                                                    //
+                                                    //     });
+                                                    //   }else{
+                                                    //     ManualIncomeDialog().editManualIncome(Get.put(AddIncomeScreenController()),
+                                                    //         income['companyName'],income['grossAnnualIncome'],income['startDate'],income['endDate'],
+                                                    //         income['employerIncomeType'],index);
+                                                    //   }
+                                                    // }
+                                                    // else if(income['employerIncomeType'] == 'Variable Income'){
+                                                    //   if(income['addedType'] == 'calculator'){
+                                                    //     Get.toNamed(RouteName.editVariableScreen,arguments: {
+                                                    //       'addedBy':income['addedBy'],
+                                                    //       'addedType':income['addedType'],
+                                                    //       'baseBonus':income['baseBonus'],
+                                                    //       'baseCommission':income['baseCommission'],
+                                                    //       'baseIncome':income['baseIncome'],
+                                                    //       'baseOther':income['baseOther'],
+                                                    //       'baseOvertime':income['baseOvertime'],
+                                                    //       'baseTip':income['baseTip'],
+                                                    //       'companyName':income['companyName'],
+                                                    //       'employerIncomeType':income['employerIncomeType'],
+                                                    //       'endDate':income['endDate'],
+                                                    //       'grossAnnualIncome':income['grossAnnualIncome'],
+                                                    //       'monthlyIncome':income['monthlyIncome'],
+                                                    //       'payPeriodEndDate':income['payPeriodEndDate'],
+                                                    //       'priorW2Bonus':income['priorW2Bonus'],
+                                                    //       'priorW2Commission':income['priorW2Commission'],
+                                                    //       'priorW2Income':income['priorW2Income'],
+                                                    //       'priorW2Other':income['priorW2Other'],
+                                                    //       'priorW2Overtime':income['priorW2Overtime'],
+                                                    //       'priorW2Tip':income['priorW2Tip'],
+                                                    //       'salaryCycle':income['salaryCycle'],
+                                                    //       'startDate':income['startDate'],
+                                                    //       'status':income['status'],
+                                                    //       'w2Bonus':income['w2Bonus'],
+                                                    //       'w2Commission':income['w2Commission'],
+                                                    //       'w2Income':income['w2Income'],
+                                                    //       'w2Other':income['w2Other'],
+                                                    //       'w2Overtime':income['w2Overtime'],
+                                                    //       'w2Tip':income['w2Tip'],
+                                                    //       'baseYear':income['baseYear'],
+                                                    //       'w2Year':income['w2Year'],
+                                                    //       'priorW2Year':income['priorW2Year'],
+                                                    //       'selectedPayPeriodEndDateDay':income['selectedPayPeriodEndDateDay'],
+                                                    //       'selectedPayPeriodEndDateMonth':income['selectedPayPeriodEndDateMonth'],
+                                                    //     });
+                                                    //   }else{
+                                                    //     ManualIncomeDialog().editManualIncome(Get.put(AddIncomeScreenController()),
+                                                    //         income['companyName'],income['grossAnnualIncome'],income['startDate'],income['endDate'],
+                                                    //         income['employerIncomeType'],index);
+                                                    //   }
+                                                    // }
+                                                    // else if(income['employerIncomeType'] == 'Form 1040 & Sch C'){
+                                                    //   if(income['addedType'] == 'calculator'){
+                                                    //     Get.toNamed(RouteName.editScheduleCScreen,
+                                                    //         arguments: {
+                                                    //           'nameOfProprietor':income['nameOfProprietor'],
+                                                    //           'principalBusinessOrProfession':income['principalBusinessOrProfession'],
+                                                    //           'companyName':income['companyName'],
+                                                    //           'currentlyActive':income['currentlyActive'],
+                                                    //           'netProfitLossRecent':income['netProfitLossRecent'],
+                                                    //           'nonRecurringRecent':income['nonRecurringRecent'],
+                                                    //           'depletionRecent':income['depletionRecent'],
+                                                    //           'depreciationRecent':income['depreciationRecent'],
+                                                    //           'mealsAndEntertainmentExclusionRecent':income['mealsAndEntertainmentExclusionRecent'],
+                                                    //           'businessUseOfHomeRecent':income['businessUseOfHomeRecent'],
+                                                    //           'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent'],
+                                                    //           'businessMilesRecent':income['businessMilesRecent'],
+                                                    //           'netProfitLossPrior':income['netProfitLossPrior'],
+                                                    //           'nonRecurringPrior':income['nonRecurringPrior'],
+                                                    //           'depletionPrior':income['depletionPrior'],
+                                                    //           'depreciationPrior':income['depreciationPrior'],
+                                                    //           'mealsAndEntertainmentExclusionPrior':income['mealsAndEntertainmentExclusionPrior'],
+                                                    //           'businessUseOfHomePrior':income['businessUseOfHomePrior'],
+                                                    //           'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior'],
+                                                    //           'businessMilesPrior':income['businessMilesPrior'],
+                                                    //           'numberOfMonths':income['numberOfMonths'],
+                                                    //           'baseYear':income['baseYear'],
+                                                    //           'w2Year':income['w2Year'],
+                                                    //           'priorW2Year':income['priorW2Year'],
+                                                    //           'businessStartDateStamp':income['businessStartDateStamp'],
+                                                    //           'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
+                                                    //           'startDate':income['startDate'],
+                                                    //           'index':index.toString(),
+                                                    //         });
+                                                    //   }else{
+                                                    //     ManualBusinessDialog().editManualBusinessDialog(
+                                                    //         Get.put(AddIncomeScreenController()),
+                                                    //         index,
+                                                    //         income['companyName'],
+                                                    //         income['currentlyActive'],
+                                                    //         income['employerIncomeType'],
+                                                    //         income['grossAnnualIncome'],
+                                                    //         income['startDate'],
+                                                    //         income['businessStartDateStamp'],
+                                                    //         income['greaterOrLessThen2Years']
+                                                    //     );
+                                                    //   }
+                                                    // }
+                                                    // else if(income['employerIncomeType'] == 'Form 1065 & K1'){
+                                                    //   if(income['addedType'] == 'calculator'){
+                                                    //     Get.toNamed(RouteName.edit1040K11065Screen,
+                                                    //         arguments: {
+                                                    //           'nameOfPartnerShip':income['nameOfPartnerShip'],
+                                                    //           'principalBusinessActivity':income['principalBusinessActivity'],
+                                                    //           'principalProductOrService':income['principalProductOrService'],
+                                                    //           'companyName':income['companyName'],
+                                                    //           'startDate':income['startDate'],
+                                                    //           'currentlyActive':income['currentlyActive'],
+                                                    //           'w2IncomeFromSelfEmploymentRecent':income['w2IncomeFromSelfEmploymentRecent'],
+                                                    //           'w2IncomeFromSelfEmploymentPrior':income['w2IncomeFromSelfEmploymentPrior'],
+                                                    //           'ordinaryIncomeLossRecent':income['ordinaryIncomeLossRecent'],
+                                                    //           'guaranteedPaymentToPartnerRecent':income['guaranteedPaymentToPartnerRecent'],
+                                                    //           'ordinaryIncomeLossPrior':income['ordinaryIncomeLossPrior'],
+                                                    //           'guaranteedPaymentToPartnerPrior':income['guaranteedPaymentToPartnerPrior'],
+                                                    //           'ordinaryIncomeLossFromOtherPartnershipRecent':income['ordinaryIncomeLossFromOtherPartnershipRecent'],
+                                                    //           'nonRecurringOtherIncomeLossRecent':income['nonRecurringOtherIncomeLossRecent'],
+                                                    //           'depreciationRecent':income['depreciationRecent'],
+                                                    //           'depletionRecent':income['depletionRecent'],
+                                                    //           'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent'],
+                                                    //           'mortgagePayableInLessThanOneYearRecent':income['mortgagePayableInLessThanOneYearRecent'],
+                                                    //           'mealsAndEntertainmentRecent':income['mealsAndEntertainmentRecent'],
+                                                    //           'ownershipPercentageRecent':income['ownershipPercentageRecent'],
+                                                    //           'ordinaryIncomeLossFromOtherPartnershipPrior':income['ordinaryIncomeLossFromOtherPartnershipPrior'],
+                                                    //           'nonRecurringOtherIncomeLossPrior':income['nonRecurringOtherIncomeLossPrior'],
+                                                    //           'depreciationPrior':income['depreciationPrior'],
+                                                    //           'depletionPrior':income['depletionPrior'],
+                                                    //           'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior'],
+                                                    //           'mortgagePayableInLessThanOneYearPrior':income['mortgagePayableInLessThanOneYearPrior'],
+                                                    //           'mealsAndEntertainmentPrior':income['mealsAndEntertainmentPrior'],
+                                                    //           'ownershipPercentagePrior':income['ownershipPercentagePrior'],
+                                                    //           'addPartnershipReturnsPrior':income['addPartnershipReturnsPrior'],
+                                                    //           'addPartnershipReturnsRecent':income['addPartnershipReturnsRecent'],
+                                                    //           'numberOfMonths':income['numberOfMonths'],
+                                                    //           'baseYear':income['baseYear'],
+                                                    //           'w2Year':income['w2Year'],
+                                                    //           'priorW2Year':income['priorW2Year'],
+                                                    //           'businessStartDateStamp':income['businessStartDateStamp'],
+                                                    //           'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
+                                                    //           'index':index.toString(),
+                                                    //         });
+                                                    //   }else{
+                                                    //     ManualBusinessDialog().editManualBusinessDialog(
+                                                    //         Get.put(AddIncomeScreenController()),
+                                                    //         index,
+                                                    //         income['companyName'],
+                                                    //         income['currentlyActive'],
+                                                    //         income['employerIncomeType'],
+                                                    //         income['grossAnnualIncome'],
+                                                    //         income['startDate'],
+                                                    //         income['businessStartDateStamp'],
+                                                    //         income['greaterOrLessThen2Years']
+                                                    //     );
+                                                    //   }
+                                                    // }
+                                                    // else if(income['employerIncomeType'] == 'Form 1120S & K1'){
+                                                    //   if(income['addedType'] == 'calculator'){
+                                                    //     Get.toNamed(RouteName.edit1040K11120SScreen,
+                                                    //         arguments: {
+                                                    //           'nameOfPartnerShip':income['nameOfPartnerShip'],
+                                                    //           'sElectionEffectiveDate':income['sElectionEffectiveDate'],
+                                                    //           'companyName':income['companyName'],
+                                                    //           'startDate':income['startDate'],
+                                                    //           'currentlyActive':income['currentlyActive'],
+                                                    //           'w2IncomeFromSelfEmploymentRecent':income['w2IncomeFromSelfEmploymentRecent'],
+                                                    //           'w2IncomeFromSelfEmploymentPrior':income['w2IncomeFromSelfEmploymentPrior'],
+                                                    //           'ordinaryIncomeLossRecent':income['ordinaryIncomeLossRecent'],
+                                                    //           'ordinaryIncomeLossPrior':income['ordinaryIncomeLossPrior'],
+                                                    //           'nonRecurringOtherIncomeLossRecent':income['nonRecurringOtherIncomeLossRecent'],
+                                                    //           'depreciationRecent':income['depreciationRecent'],
+                                                    //           'depletionRecent':income['depletionRecent'],
+                                                    //           'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent'],
+                                                    //           'mortgagePayableInLessThanOneYearRecent':income['mortgagePayableInLessThanOneYearRecent'],
+                                                    //           'mealsAndEntertainmentRecent':income['mealsAndEntertainmentRecent'],
+                                                    //           'ownershipPercentageRecent':income['ownershipPercentageRecent'],
+                                                    //           'nonRecurringOtherIncomeLossPrior':income['nonRecurringOtherIncomeLossPrior'],
+                                                    //           'depreciationPrior':income['depreciationPrior'],
+                                                    //           'depletionPrior':income['depletionPrior'],
+                                                    //           'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior'],
+                                                    //           'mortgagePayableInLessThanOneYearPrior':income['mortgagePayableInLessThanOneYearPrior'],
+                                                    //           'mealsAndEntertainmentPrior':income['mealsAndEntertainmentPrior'],
+                                                    //           'ownershipPercentagePrior':income['ownershipPercentagePrior'],
+                                                    //           'addPartnershipReturnsPrior':income['addPartnershipReturnsPrior'],
+                                                    //           'addPartnershipReturnsRecent':income['addPartnershipReturnsRecent'],
+                                                    //           'numberOfMonths':income['numberOfMonths'],
+                                                    //           'baseYear':income['baseYear'],
+                                                    //           'w2Year':income['w2Year'],
+                                                    //           'priorW2Year':income['priorW2Year'],
+                                                    //           'businessStartDateStamp':income['businessStartDateStamp'],
+                                                    //           'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
+                                                    //           'index':index.toString(),
+                                                    //         });
+                                                    //   }else{
+                                                    //     ManualBusinessDialog().editManualBusinessDialog(
+                                                    //         Get.put(AddIncomeScreenController()),
+                                                    //         index,
+                                                    //         income['companyName'],
+                                                    //         income['currentlyActive'],
+                                                    //         income['employerIncomeType'],
+                                                    //         income['grossAnnualIncome'],
+                                                    //         income['startDate'],
+                                                    //         income['businessStartDateStamp'],
+                                                    //         income['greaterOrLessThen2Years']
+                                                    //     );
+                                                    //   }
+                                                    // }
+                                                    // else if(income['employerIncomeType'] == 'Form 1120'){
+                                                    //   if(income['addedType'] == 'calculator'){
+                                                    //     Get.toNamed(RouteName.edit10401120Screen,
+                                                    //         arguments: {
+                                                    //           'name':income['name'],
+                                                    //           'companyName':income['companyName'],
+                                                    //           'startDate':income['startDate'],
+                                                    //           'currentlyActive':income['currentlyActive'],
+                                                    //           'w2IncomeFromSelfEmploymentRecent':income['w2IncomeFromSelfEmploymentRecent'],
+                                                    //           'w2IncomeFromSelfEmploymentPrior':income['w2IncomeFromSelfEmploymentPrior'],
+                                                    //           'taxableIncomeRecent':income['taxableIncomeRecent'],
+                                                    //           'totalTaxRecent':income['totalTaxRecent'],
+                                                    //           'nonRecurringGainLossRecent':income['nonRecurringGainLossRecent'],
+                                                    //           'nonRecurringOtherIncomeLossRecent':income['nonRecurringOtherIncomeLossRecent'],
+                                                    //           'depreciationRecent':income['depreciationRecent'],
+                                                    //           'depletionRecent':income['depletionRecent'],
+                                                    //           'amortizationCasualtyLossOneTimeExpenseRecent':income['amortizationCasualtyLossOneTimeExpenseRecent'],
+                                                    //           'netOperatingLossAndSpecialDeductionsRecent':income['netOperatingLossAndSpecialDeductionsRecent'],
+                                                    //           'mortgagePayableInLessThanOneYearRecent':income['mortgagePayableInLessThanOneYearRecent'],
+                                                    //           'mealsAndEntertainmentRecent':income['mealsAndEntertainmentRecent'],
+                                                    //           'ownershipPercentageRecent':income['ownershipPercentageRecent'],
+                                                    //           'dividendsPaidToBorrowerRecent':income['dividendsPaidToBorrowerRecent'],
+                                                    //           'taxableIncomePrior':income['taxableIncomePrior'],
+                                                    //           'totalTaxPrior':income['totalTaxPrior'],
+                                                    //           'nonRecurringGainLossPrior':income['nonRecurringGainLossPrior'],
+                                                    //           'nonRecurringOtherIncomeLossPrior':income['nonRecurringOtherIncomeLossPrior'],
+                                                    //           'depreciationPrior':income['depreciationPrior'],
+                                                    //           'depletionPrior':income['depletionPrior'],
+                                                    //           'amortizationCasualtyLossOneTimeExpensePrior':income['amortizationCasualtyLossOneTimeExpensePrior'],
+                                                    //           'netOperatingLossAndSpecialDeductionsPrior':income['netOperatingLossAndSpecialDeductionsPrior'],
+                                                    //           'mortgagePayableInLessThanOneYearPrior':income['mortgagePayableInLessThanOneYearPrior'],
+                                                    //           'mealsAndEntertainmentPrior':income['mealsAndEntertainmentPrior'],
+                                                    //           'ownershipPercentagePrior':income['ownershipPercentagePrior'],
+                                                    //           'dividendsPaidToBorrowerPrior':income['dividendsPaidToBorrowerPrior'],
+                                                    //           'addPartnershipReturnsPrior':income['addPartnershipReturnsPrior'],
+                                                    //           'addPartnershipReturnsRecent':income['addPartnershipReturnsRecent'],
+                                                    //           'numberOfMonths':income['numberOfMonths'],
+                                                    //           'baseYear':income['baseYear'],
+                                                    //           'w2Year':income['w2Year'],
+                                                    //           'priorW2Year':income['priorW2Year'],
+                                                    //           'businessStartDateStamp':income['businessStartDateStamp'],
+                                                    //           'greaterOrLessThen2Years':income['greaterOrLessThen2Years'],
+                                                    //           'index':index.toString(),
+                                                    //         });
+                                                    //   }else{
+                                                    //     ManualBusinessDialog().editManualBusinessDialog(
+                                                    //         Get.put(AddIncomeScreenController()),
+                                                    //         index,
+                                                    //         income['companyName'],
+                                                    //         income['currentlyActive'],
+                                                    //         income['employerIncomeType'],
+                                                    //         income['grossAnnualIncome'],
+                                                    //         income['startDate'],
+                                                    //         income['businessStartDateStamp'],
+                                                    //         income['greaterOrLessThen2Years']
+                                                    //     );
+                                                    //   }
+                                                    // }
+                                                  },
+                                                  child: Container(
+                                                      width: Get.width * .05,
+                                                      height: 24,
+                                                      decoration: BoxDecoration(
+                                                          color: AppColors.secondaryColor,
+                                                          borderRadius: BorderRadius.circular(1000)
+                                                      ),
+                                                      child: const Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                        children: [
+                                                          Icon(Icons.edit,size: 14,color: AppColors.whiteColor,),
+                                                          Text('Edit',
+                                                            style: TextStyle(
+                                                                fontSize: 8,
+                                                                color: AppColors.textColorWhite,
+                                                                fontWeight: FontWeight.bold
+                                                            ),)
+                                                        ],
+                                                      )
                                                   ),
-                                                  child: Center(
-                                                    child: const Text('View Detail',
-                                                      style: TextStyle(
-                                                          fontSize: 8,
-                                                          color: AppColors.textColorWhite,
-                                                          fontWeight: FontWeight.bold
-                                                      ),).marginSymmetric(horizontal: Get.width * .02),
-                                                  )
-                                              ),
-                                            ),
+                                                ),
+                                                SizedBox(width: 8,),
+                                                InkWell(
+                                                  onTap: ()async{
+                                                    // ManualIncomeDialog().removeIncomeDialog(index);
+
+                                                  },
+                                                  child: Container(
+                                                      width: Get.width * .05,
+                                                      height: 24,
+                                                      decoration: BoxDecoration(
+                                                          color: AppColors.deleteButtonBg,
+                                                          borderRadius: BorderRadius.circular(1000)
+                                                      ),
+                                                      child: const Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                        children: [
+                                                          Icon(Icons.delete,size: 14,color: AppColors.whiteColor,),
+                                                          Text('Trash',
+                                                            style: TextStyle(
+                                                                fontSize: 8,
+                                                                color: AppColors.textColorWhite,
+                                                                fontWeight: FontWeight.bold
+                                                            ),)
+                                                        ],
+                                                      )
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+
                                           ],
                                         )
 
@@ -1300,10 +1640,34 @@ class IncomeView extends GetView<IncomeViewController>{
 
                                       ],
                                     ).paddingOnly(top: Get.height * .008,bottom: Get.height * .01),
-                                    income['verifyStatus'] == 'Verified'?const Align(alignment:
-                                    Alignment.centerLeft,child: Text('This income is verified by zapa mortgage using income docs. This income is Included.')):
-                                    const Align(alignment:
-                                    Alignment.centerLeft,child: Text('This income is verified by zapa mortgage using income docs. However this income is Excluded.'))
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
+                                            text: 'Income Added As : ',
+                                            style: TextStyle(fontWeight: FontWeight.normal),
+                                            children: <TextSpan>[
+                                              TextSpan(text: income['addedType'], style: TextStyle(fontWeight: FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ),
+                                        RichText(
+                                          text: TextSpan(
+                                            text: 'Added By: ',
+                                            style: TextStyle(fontWeight: FontWeight.normal),
+                                            children: <TextSpan>[
+                                              TextSpan(text: income['addedByName'], style: TextStyle(fontWeight: FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+
+                                    // income['verifyStatus'] == 'Verified'?const Align(alignment:
+                                    // Alignment.centerLeft,child: Text('This income is verified by zapa mortgage using income docs. This income is Included.')):
+                                    // const Align(alignment:
+                                    // Alignment.centerLeft,child: Text('This income is verified by zapa mortgage using income docs. However this income is Excluded.'))
                                   ],
                                 ).paddingAll(8)
                             ).marginOnly(top: 8);

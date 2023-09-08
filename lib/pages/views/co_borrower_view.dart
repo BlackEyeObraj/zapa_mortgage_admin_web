@@ -61,7 +61,7 @@ class CoBorrowerView extends GetView<CoBorrowerViewController>{
                           crossAxisCount: 2, // Display two items in each row
                           mainAxisSpacing: 10.0, // Spacing between rows
                           crossAxisSpacing: 10.0, // Spacing between columns
-                          childAspectRatio: 4 / 2.4,
+                          childAspectRatio: 4 / 2.6,
                         ),
                         itemCount: documents.length,
                         shrinkWrap: true,
@@ -98,6 +98,24 @@ class CoBorrowerView extends GetView<CoBorrowerViewController>{
                                         children: <TextSpan>[
                                           TextSpan(text: data['coBorrowerPhoneNumber'], style: const TextStyle(fontWeight: FontWeight.normal)),
                                         ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8,),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: RichText(
+                                        text: TextSpan(
+                                          text: 'This Co-Borrower authorized ${Constants().appName} to user his info / balance for this Borrower: ',
+                                          style: TextStyle(fontWeight: FontWeight.normal,
+                                              color: AppColors.textColorWhite,fontSize: 14),
+                                          children: <TextSpan>[
+                                            TextSpan(text: data['coBorrowerSharedZapa']?'Yes':'No', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -157,9 +175,38 @@ class CoBorrowerView extends GetView<CoBorrowerViewController>{
                                         Text('FICO',style: TextStyle(fontWeight: FontWeight.bold,
                                             color: AppColors.textColorWhite,fontSize: 14)),
                                         SizedBox(height: 8,),
-                                        TextWidget(
-                                            text: data['coBorrowerFICO'],
-                                            fontSize: 14,
+                                        data['coBorrowerId'] != ''?
+                                        StreamBuilder<DocumentSnapshot>(
+                                          stream: FirestoreService().getCoBorrowerFICO(data['coBorrowerId']),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.hasError) {
+                                              return Text('Error: ${snapshot.error}');
+                                            }
+
+                                            if (!snapshot.hasData) {
+                                              return const Text('Loading...',style: TextStyle(fontSize: 8),);
+                                            }
+
+                                            dynamic ficoObject;
+                                            try {
+                                              ficoObject = snapshot.data?.get('fico');
+                                            } catch (error) {
+                                              ficoObject = null;
+                                            }
+                                            dynamic userScoreValue = ficoObject != null ? ficoObject['userScore'] : '0';
+
+                                            return TextWidget(
+                                                text: userScoreValue,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                fontColor: AppColors.textColorWhite,
+                                                textAlign: TextAlign.center);
+                                            // Text(userScoreValue,style: TextStyle(fontWeight: FontWeight.bold,
+                                            //   color: AppColors.textColorWhite,fontSize: 12.sp));
+                                          },
+                                        ): const TextWidget(
+                                            text: '0',
+                                            fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             fontColor: AppColors.textColorWhite,
                                             textAlign: TextAlign.center)
@@ -170,9 +217,31 @@ class CoBorrowerView extends GetView<CoBorrowerViewController>{
                                         Text('Income',style: TextStyle(fontWeight: FontWeight.bold,
                                             color: AppColors.textColorWhite,fontSize: 14)),
                                         SizedBox(height: 8,),
-                                        TextWidget(
-                                            text: '\$${UtilMethods().formatNumberWithCommas(double.parse(data['coBorrowerIncome']))}',
-                                            fontSize: 14,
+                                        data['coBorrowerId'] != ''?
+                                        StreamBuilder<double>(
+                                          stream: FirestoreService().calculateTotalIncludedCoBorrowerIncomeListener(data['coBorrowerId']),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              // You can show a loading indicator here if needed.
+                                              return Text('Loading...',style: TextStyle(fontSize: 8),);
+                                            } else if (snapshot.hasError) {
+                                              // Handle error state
+                                              return Text('Error: ${snapshot.error}');
+                                            } else {
+                                              // Data is available, display the total amount
+                                              final totalAmount = snapshot.data ?? 0.0;
+                                              return TextWidget(
+                                                  text: '\$${UtilMethods().formatNumberWithCommas(totalAmount)}',
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontColor: AppColors.textColorWhite,
+                                                  textAlign: TextAlign.center);
+                                            }
+                                          },
+                                        ):
+                                        const TextWidget(
+                                            text: '\$0.00',
+                                            fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             fontColor: AppColors.textColorWhite,
                                             textAlign: TextAlign.center)
@@ -183,9 +252,31 @@ class CoBorrowerView extends GetView<CoBorrowerViewController>{
                                         Text('Liability',style: TextStyle(fontWeight: FontWeight.bold,
                                             color: AppColors.textColorWhite,fontSize: 14)),
                                         SizedBox(height: 8,),
-                                        TextWidget(
-                                            text: '\$${UtilMethods().formatNumberWithCommas(double.parse(data['coBorrowerLiability']))}',
-                                            fontSize: 14,
+                                        data['coBorrowerId'] != ''?
+                                        StreamBuilder<double>(
+                                          stream: FirestoreService().calculateTotalCoBorrowerIncludedLiabilityListener(data['coBorrowerId']),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              // You can show a loading indicator here if needed.
+                                              return Text('Loading...',style: TextStyle(fontSize: 8),);
+                                            } else if (snapshot.hasError) {
+                                              // Handle error state
+                                              return Text('Error: ${snapshot.error}');
+                                            } else {
+                                              // Data is available, display the total amount
+                                              final totalAmount = snapshot.data ?? 0.0;
+                                              return TextWidget(
+                                                  text: '\$${UtilMethods().formatNumberWithCommas(totalAmount)}',
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontColor: AppColors.textColorWhite,
+                                                  textAlign: TextAlign.center);
+                                            }
+                                          },
+                                        ):
+                                        const TextWidget(
+                                            text: '\$0.00',
+                                            fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             fontColor: AppColors.textColorWhite,
                                             textAlign: TextAlign.center)
@@ -197,34 +288,8 @@ class CoBorrowerView extends GetView<CoBorrowerViewController>{
                                 Container(
                                   width: Get.width * 1,
                                   color: AppColors.secondaryColor,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('Added By ${Constants().appName}',style: TextStyle(fontWeight: FontWeight.bold,
-                                          color: AppColors.textColorWhite,fontSize: 14)).paddingAll(4),
-                                      InkWell(
-                                        onTap: (){
-                                          CoBorrowerDialog().editBorrower(data['id'], data['coBorrowerVerifiedFICO'], data['coBorrowerVerifiedIncome'], data['coBorrowerVerifiedLiability']);
-                                        },
-                                        child: Container(
-                                            height: Get.height * .03,
-                                            decoration: BoxDecoration(
-                                                color: AppColors.whiteColor,
-                                                borderRadius: BorderRadius.circular(10000)
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: [
-                                                const Icon(Icons.edit,color: AppColors.secondaryColor,size: 12,),
-                                                SizedBox(width: Get.width * .01,),
-                                                const Text('Edit',style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.secondaryColor,fontSize: 10),)
-                                              ],
-                                            ).paddingSymmetric(horizontal: Get.width  * .01)
-                                        ),
-                                      )
-                                    ],
-                                  ),
+                                  child: Text('Added By ${Constants().appName}',style: TextStyle(fontWeight: FontWeight.bold,
+                                      color: AppColors.textColorWhite,fontSize: 14)).paddingAll(4),
                                 ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -234,9 +299,38 @@ class CoBorrowerView extends GetView<CoBorrowerViewController>{
                                         Text('FICO',style: TextStyle(fontWeight: FontWeight.bold,
                                             color: AppColors.textColorWhite,fontSize: 14)),
                                         SizedBox(height: 8,),
-                                        TextWidget(
-                                            text: data['coBorrowerVerifiedFICO'],
-                                            fontSize: 14,
+                                        data['coBorrowerId'] != ''?
+                                        StreamBuilder<DocumentSnapshot>(
+                                          stream: FirestoreService().getCoBorrowerFICO(data['coBorrowerId']),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.hasError) {
+                                              return Text('Error: ${snapshot.error}');
+                                            }
+
+                                            if (!snapshot.hasData) {
+                                              return  const Text('Loading...',style: TextStyle(fontSize: 8),);
+                                            }
+
+                                            dynamic ficoObject;
+                                            try {
+                                              ficoObject = snapshot.data?.get('fico');
+                                            } catch (error) {
+                                              ficoObject = null;
+                                            }
+                                            dynamic zapaScoreValue = ficoObject != null ? ficoObject['zapaScore'] : '0';
+
+                                            return TextWidget(
+                                                text: zapaScoreValue,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                fontColor: AppColors.textColorWhite,
+                                                textAlign: TextAlign.center);
+                                            // Text(userScoreValue,style: TextStyle(fontWeight: FontWeight.bold,
+                                            //   color: AppColors.textColorWhite,fontSize: 12.sp));
+                                          },
+                                        ): const TextWidget(
+                                            text: '0',
+                                            fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             fontColor: AppColors.textColorWhite,
                                             textAlign: TextAlign.center)
@@ -248,15 +342,34 @@ class CoBorrowerView extends GetView<CoBorrowerViewController>{
                                         Text('Income',style: TextStyle(fontWeight: FontWeight.bold,
                                             color: AppColors.textColorWhite,fontSize: 14)),
                                         SizedBox(height: 8,),
-                                        data['coBorrowerSharedVerifiedData'] == true?
-                                        TextWidget(
-                                            text: '\$${UtilMethods().formatNumberWithCommas(double.parse(data['coBorrowerVerifiedIncome']))}',
-                                            fontSize: 14,
+                                        data['coBorrowerId'] != ''?
+                                        StreamBuilder<double>(
+                                          stream: FirestoreService().calculateTotalVerifiedCoBorrowerIncomesListener(data['coBorrowerId']),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              // You can show a loading indicator here if needed.
+                                              return Text('Loading...',style: TextStyle(fontSize: 8),);
+                                            } else if (snapshot.hasError) {
+                                              // Handle error state
+                                              return Text('Error: ${snapshot.error}');
+                                            } else {
+                                              // Data is available, display the total amount
+                                              final totalAmount = snapshot.data ?? 0.0;
+                                              return TextWidget(
+                                                  text: '\$${UtilMethods().formatNumberWithCommas(totalAmount)}',
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontColor: AppColors.textColorWhite,
+                                                  textAlign: TextAlign.center);
+                                            }
+                                          },
+                                        ):
+                                        const TextWidget(
+                                            text: '\$0.00',
+                                            fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             fontColor: AppColors.textColorWhite,
                                             textAlign: TextAlign.center)
-                                            :Text('\$0.00',style: TextStyle(fontWeight: FontWeight.bold,
-                                            color: AppColors.textColorWhite,fontSize: 14))
                                       ],
                                     ),
                                     Column(
@@ -264,15 +377,34 @@ class CoBorrowerView extends GetView<CoBorrowerViewController>{
                                         Text('Liability',style: TextStyle(fontWeight: FontWeight.bold,
                                             color: AppColors.textColorWhite,fontSize: 14)),
                                         SizedBox(height: 8,),
-                                        data['coBorrowerSharedVerifiedData'] == true?
-                                        TextWidget(
-                                            text: '\$${UtilMethods().formatNumberWithCommas(double.parse(data['coBorrowerVerifiedLiability']))}',
-                                            fontSize: 14,
+                                        data['coBorrowerId'] != ''?
+                                        StreamBuilder<double>(
+                                          stream: FirestoreService().calculateTotalCoBorrowerVerifiedLiabilityListener(data['coBorrowerId']),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              // You can show a loading indicator here if needed.
+                                              return Text('Loading...',style: TextStyle(fontSize: 8),);
+                                            } else if (snapshot.hasError) {
+                                              // Handle error state
+                                              return Text('Error: ${snapshot.error}');
+                                            } else {
+                                              // Data is available, display the total amount
+                                              final totalAmount = snapshot.data ?? 0.0;
+                                              return TextWidget(
+                                                  text: '\$${UtilMethods().formatNumberWithCommas(totalAmount)}',
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontColor: AppColors.textColorWhite,
+                                                  textAlign: TextAlign.center);
+                                            }
+                                          },
+                                        ):
+                                        const TextWidget(
+                                            text: '\$0.00',
+                                            fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             fontColor: AppColors.textColorWhite,
                                             textAlign: TextAlign.center)
-                                            :Text('\$0.00',style: TextStyle(fontWeight: FontWeight.bold,
-                                            color: AppColors.textColorWhite,fontSize: 14))
                                       ],
                                     )
                                   ],

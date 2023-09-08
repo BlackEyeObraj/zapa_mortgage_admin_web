@@ -14,6 +14,7 @@ class UserDetailPageController extends GetxController{
 
   RxString _borrowerId = ''.obs;
   RxString _borrowerPhoneNumber = ''.obs;
+  RxString _borrowerName = ''.obs;
   final RxString _selectedTab = 'Summary'.obs;
   final RxBool _summaryOptionHover = false.obs;
   final RxBool _ficoOptionHover = false.obs;
@@ -27,6 +28,7 @@ class UserDetailPageController extends GetxController{
 
   String get borrowerId => _borrowerId.value;
   String get borrowerPhoneNumber => _borrowerPhoneNumber.value;
+  String get borrowerName => _borrowerName.value;
   String get selectedTab => _selectedTab.value;
   bool get summaryOptionHover => _summaryOptionHover.value;
   bool get ficoOptionHover => _ficoOptionHover.value;
@@ -46,6 +48,7 @@ class UserDetailPageController extends GetxController{
     }else{
       _borrowerId.value  = Get.arguments['borrowerId'];
       _borrowerPhoneNumber.value  = Get.arguments['borrowerPhoneNumber'];
+      _borrowerName.value  = Get.arguments['borrowerUserName'];
       FirestoreService().setLastViewedBy(borrowerId, box.read(Constants.USER_NAME),DateTime.now());
       statusSubscription = firestoreService.getAccountStatusStream(box.read(Constants.USER_ID)).listen((status) {
         if(status == 'inActive'){

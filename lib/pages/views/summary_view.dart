@@ -13,7 +13,9 @@ import '../../utils/utils_mehtods.dart';
 
 class SummaryView extends GetView<SummaryViewController>{
   final String borrowerId;
-  SummaryView({required this.borrowerId});
+  final String borrowerPhoneNumber;
+  final String borrowerName;
+  SummaryView({required this.borrowerId,required this.borrowerPhoneNumber, required this.borrowerName});
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +79,7 @@ class SummaryView extends GetView<SummaryViewController>{
                                         SizedBox(width: 8,),
                                         InkWell(
                                           onTap: (){
-                                            NickNameDialog().addNickName(borrowerId,controller.nickName.value);
+                                            NickNameDialog().addNickName(borrowerId,controller.nickName.value,borrowerName,borrowerPhoneNumber);
 
                                           },child: Icon(Icons.edit,color: AppColors.secondaryColor,size: 18,))
                                       ],
@@ -408,8 +410,8 @@ class SummaryView extends GetView<SummaryViewController>{
                                           return Text('Loading ...');
                                         }
                                         var userData = snapshot.data!.data() as Map<String, dynamic>;
-                                        var doNotCall = userData['doNotCall'] as String;
-                                        return Text(doNotCall ,style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal,
+                                        var doNotCall = userData['doNotCall'] as bool;
+                                        return Text(doNotCall ? 'Yes':'No' ,style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal,
                                             color: AppColors.textColorWhite),);
                                       },
                                     )

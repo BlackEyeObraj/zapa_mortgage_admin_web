@@ -330,7 +330,7 @@ class UsersView extends GetView<UsersViewController>{
                                         SizedBox(width: 16,),
                                         InkWell(
                                           onTap: (){
-                                            NickNameDialog().addNickName(data['userId'],data['nickName']??'');
+                                            NickNameDialog().addNickName(data['userId'],data['nickName']??'',data['userName'],data['phoneNumber']);
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
@@ -393,7 +393,7 @@ class UsersView extends GetView<UsersViewController>{
 
                             InkWell(
                               onTap: ()async{
-                                Get.toNamed(RouteName.userDetailScreen,arguments: {'borrowerId': data['userId'],'borrowerPhoneNumber': data['phoneNumber'],});
+                                Get.toNamed(RouteName.userDetailScreen,arguments: {'borrowerId': data['userId'],'borrowerPhoneNumber': data['phoneNumber'],'borrowerUserName':data['userName']});
                               },
                               child: MouseRegion(
                                 onEnter: (_) => controller.setHoverOption(data['phoneNumber']),

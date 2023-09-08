@@ -7,6 +7,7 @@ class FundsViewController extends GetxController{
   final RxBool _verifiedCheck = true.obs;
   final RxBool _verifiedButExeCheck = false.obs;
   final RxString selectedAddedBy = 'processor'.obs;
+  final RxString searchFilter = 'All'.obs;
 
 
   bool get selectedAssetTypeEnable => _selectedAssetTypeEnable.value;

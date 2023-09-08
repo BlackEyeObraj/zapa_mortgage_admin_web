@@ -45,7 +45,7 @@ class LiabilityView extends GetView<LiabilityViewController>{
                       alignment: Alignment.centerRight,
                       child: InkWell(
                         onTap: (){
-                          LiabilityDialog().addLiabilityDialog(borrowerId);
+                          LiabilityDialog().addLiabilityDialog(borrowerId,Get.put(LiabilityViewController()));
                         },
                         child: Container(
                           height: Get.height * 1,
@@ -467,17 +467,22 @@ class LiabilityView extends GetView<LiabilityViewController>{
                                                 children: [
                                                   InkWell(
                                                     onTap: (){
-                                                      // LiabilityDialog().editLiabilityDialog(
-                                                      //     index,
-                                                      //     liability['name'],
-                                                      //     monthlyAmount.toStringAsFixed(2),
-                                                      //     liability['type'],
-                                                      //     balanceAmount.toStringAsFixed(2),
-                                                      //     liability['monthRemaining'],
-                                                      //     liability['status'],
-                                                      //     controller
-                                                      //
-                                                      // );
+                                                      LiabilityDialog().editLiabilityDialog(
+                                                          liability['addedBy'],
+                                                          borrowerId,
+                                                        index,
+                                                        liability['name'],
+                                                        monthlyAmount.toStringAsFixed(2),
+                                                        liability['type'],
+                                                        balanceAmount.toStringAsFixed(2),
+                                                        liability['monthRemaining'],
+                                                        liability['status'],
+                                                        controller,
+                                                        liability['iKnow'],
+                                                        liability['iDoNotKnow'],
+                                                        liability['executionReason'] == null?'':liability['executionReason'],
+                                                          liability['verifyStatus']
+                                                      );
                                                     },
                                                     child: Container(
                                                         width: Get.width * .04,
@@ -657,7 +662,8 @@ class LiabilityView extends GetView<LiabilityViewController>{
                               Container(
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
-                                      color: AppColors.liabilityItemsBackgroundColor.withOpacity(.4)
+                                      color: AppColors.liabilityItemsBackgroundColor.withOpacity(.4),
+                                    border: Border.all(color: liability['verifyStatus'] == 'Verified'?AppColors.primaryColor:AppColors.transparentColor,width: 2)
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -703,17 +709,23 @@ class LiabilityView extends GetView<LiabilityViewController>{
                                                     children: [
                                                       InkWell(
                                                         onTap: (){
-                                                          // LiabilityDialog().editLiabilityDialog(
-                                                          //     index,
-                                                          //     liability['name'],
-                                                          //     monthlyAmount.toStringAsFixed(2),
-                                                          //     liability['type'],
-                                                          //     balanceAmount.toStringAsFixed(2),
-                                                          //     liability['monthRemaining'],
-                                                          //     liability['status'],
-                                                          //     controller
-                                                          //
-                                                          // );
+                                                          LiabilityDialog().editLiabilityDialog(
+                                                              liability['addedBy'],
+                                                              borrowerId,
+                                                            index,
+                                                            liability['name'],
+                                                            monthlyAmount.toStringAsFixed(2),
+                                                            liability['type'],
+                                                            balanceAmount.toStringAsFixed(2),
+                                                            liability['monthRemaining'],
+                                                            liability['status'],
+                                                            controller,
+                                                            liability['iKnow'],
+                                                            liability['iDoNotKnow'],
+                                                              liability['executionReason'] == null?'':liability['executionReason'],
+                                                              liability['verifyStatus']
+
+                                                          );
                                                         },
                                                         child: Container(
                                                             width: Get.width * .04,

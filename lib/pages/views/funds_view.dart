@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,7 @@ import 'package:zapa_mortgage_admin_web/controllers/funds_view_controller.dart';
 
 import '../../res/app_colors.dart';
 import '../../services/firestore_service.dart';
+import '../../utils/constants.dart';
 import '../../utils/dialogs/add_fund_dialog.dart';
 import '../../utils/utils_mehtods.dart';
 import '../../utils/widgets/text_widget.dart';
@@ -40,30 +42,106 @@ class FundsView extends GetView<FundsViewController>{
                           ),
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: InkWell(
-                          onTap: (){
-                            FundDialog().addFundDialog(borrowerId);
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Text('Filter By: ',style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.textColorWhite),),
+                              Container(
+                                width: 230,
+                                decoration: BoxDecoration(
+                                    border: Border.all(color: AppColors.whiteColor,width: 1)
+                                ),
+                                child: DropdownButtonFormField2<String>(
+                                  isExpanded: false,
+                                  decoration: InputDecoration(
+                                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                                      border: InputBorder.none
+                                    // Add more decoration..
+                                  ),
+                                  // value: 'All',
+                                  hint: const Text(
+                                    'Select Borrower ER Agent',
+                                    style: TextStyle(fontSize: 12,color: AppColors.whiteColor),
+                                  ),
+                                  value: 'All',
+                                  items: Constants().searchBy
+                                      .map((item) => DropdownMenuItem<String>(
+                                    value: item,
+                                    child: Text(
+                                      item,
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          color: AppColors.textColorWhite
+                                      ),
+                                    ),
+                                  )).toList(),
+                                  validator: (value) {
+                                    if (value == null) {
+                                      return 'Select Borrower ER Agent';
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: (value) {
+                                    //Do something when selected item is changed.
+                                    // selectedLiabilityType = value.toString();
+                                    controller.searchFilter.value = value!;
+                                  },
+                                  onSaved: (value) {
+                                    // selectedLiabilityType = value.toString();
+                                    controller.searchFilter.value = value!;
+                                  },
+                                  buttonStyleData: ButtonStyleData(
+                                      padding: EdgeInsets.only(right: 8),
+                                      decoration: BoxDecoration(
+                                          border: Border.all(color: AppColors.primaryColor)
+                                      )
+                                  ),
+                                  iconStyleData: const IconStyleData(
+                                    icon: Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Colors.white,
+                                    ),
+                                    iconSize: 24,
+                                  ),
+                                  dropdownStyleData: DropdownStyleData(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(15),
+                                        color: AppColors.primaryColor
+                                    ),
+                                  ),
+                                  menuItemStyleData: const MenuItemStyleData(
+                                    padding: EdgeInsets.symmetric(horizontal: 16),
+                                  ),
+                                ),
+                              ).marginOnly(right: 8),
+                            ],
+                          ).marginOnly(left: 16),
+                          InkWell(
+                            onTap: (){
+                              FundDialog().addFundDialog(borrowerId);
 
-                          },
-                          child: Container(
-                            height: Get.height * 1,
-                            width: 120,
-                            decoration: BoxDecoration(
-                                color: AppColors.secondaryColor,
-                                borderRadius: BorderRadius.circular(10000)
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Icon(Icons.add,color: AppColors.whiteColor,),
-                                Text('Add New',style: TextStyle(color: AppColors.textColorWhite),)
-                              ],
-                            ),
-                          ).paddingOnly(top: 16,bottom: 16,right: 16),
-                        ),
+                            },
+                            child: Container(
+                              height: Get.height * 1,
+                              width: 120,
+                              decoration: BoxDecoration(
+                                  color: AppColors.secondaryColor,
+                                  borderRadius: BorderRadius.circular(10000)
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Icon(Icons.add,color: AppColors.whiteColor,),
+                                  Text('Add New',style: TextStyle(color: AppColors.textColorWhite),)
+                                ],
+                              ),
+                            ).paddingOnly(top: 16,bottom: 16,right: 16),
+                          ),
+
+                        ],
                       )
                     ],
                   )
@@ -255,7 +333,7 @@ class FundsView extends GetView<FundsViewController>{
               Expanded(
                   child: SingleChildScrollView(
                     child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                      stream: FirestoreService().getFunds(borrowerId),
+                      stream: FirestoreService().getFunds(borrowerId,controller.searchFilter.value),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Center(child: CircularProgressIndicator());
@@ -310,7 +388,7 @@ class FundsView extends GetView<FundsViewController>{
                               var fund = funds[index];
                               double balanceAmount = double.parse(fund['currentBalance']);
                               int itemNumber = index + 1;
-                              return fund['addedBy'] == 'customer'? Container(
+                              return  fund['addedBy'] == 'customer'? Container(
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
                                       color: AppColors.liabilityItemsBackgroundColor.withOpacity(.4)
@@ -391,6 +469,18 @@ class FundsView extends GetView<FundsViewController>{
                                                       //     controller
                                                       //
                                                       // );
+                                                      FundDialog().editFundDialog(
+                                                          borrowerId,
+                                                          index,
+                                                          fund['assetType'],
+                                                          fund['accountNumber'],
+                                                          fund['currentBalance'],
+                                                          fund['bankName'],
+                                                          fund['userVerifiedFund'],
+                                                          fund['status'],
+                                                          fund['addedBy'],
+                                                          fund['verifyStatus'],
+                                                      );
                                                     },
                                                     child: Container(
                                                         width: Get.width * .04,
@@ -416,6 +506,7 @@ class FundsView extends GetView<FundsViewController>{
                                                   InkWell(
                                                     onTap: ()async{
                                                       // LiabilityDialog().removeLiabilityDialog(index);
+                                                      FundDialog().removeFundDialog(index,borrowerId);
                                                     },
                                                     child: Container(
                                                         width: Get.width * .04,
@@ -533,7 +624,9 @@ class FundsView extends GetView<FundsViewController>{
                               Container(
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
-                                      color: AppColors.liabilityItemsBackgroundColor.withOpacity(.4)
+                                      color: AppColors.liabilityItemsBackgroundColor.withOpacity(.4),
+                                      border: Border.all(color: fund['verifyStatus'] == 'Verified'?AppColors.primaryColor:AppColors.transparentColor,width: 2)
+
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -579,17 +672,18 @@ class FundsView extends GetView<FundsViewController>{
                                                     children: [
                                                       InkWell(
                                                         onTap: (){
-                                                          // LiabilityDialog().editLiabilityDialog(
-                                                          //     index,
-                                                          //     liability['name'],
-                                                          //     monthlyAmount.toStringAsFixed(2),
-                                                          //     liability['type'],
-                                                          //     balanceAmount.toStringAsFixed(2),
-                                                          //     liability['monthRemaining'],
-                                                          //     liability['status'],
-                                                          //     controller
-                                                          //
-                                                          // );
+                                                          FundDialog().editFundDialog(
+                                                            borrowerId,
+                                                            index,
+                                                            fund['assetType'],
+                                                            fund['accountNumber'],
+                                                            fund['currentBalance'],
+                                                            fund['bankName'],
+                                                            fund['userVerifiedFund'],
+                                                            fund['status'],
+                                                            fund['addedBy'],
+                                                            fund['verifyStatus'],
+                                                          );
                                                         },
                                                         child: Container(
                                                             width: Get.width * .04,
@@ -614,7 +708,7 @@ class FundsView extends GetView<FundsViewController>{
                                                       ),
                                                       InkWell(
                                                         onTap: ()async{
-                                                          // LiabilityDialog().removeLiabilityDialog(index);
+                                                          FundDialog().removeFundDialog(index,borrowerId);
                                                         },
                                                         child: Container(
                                                             width: Get.width * .04,
@@ -717,344 +811,6 @@ class FundsView extends GetView<FundsViewController>{
                               ).paddingSymmetric(vertical: 4);
                             },
                           ).marginAll(16);
-                          // ListView.separated(
-                          // separatorBuilder: (context, index) => const SizedBox(height: 8),
-                          // itemCount: funds.length,
-                          // shrinkWrap: true,
-                          // physics: const NeverScrollableScrollPhysics(),
-                          // itemBuilder: (context, index) {
-                          //   // controller.setFundsTotal();
-                          //   var fund = funds[index];
-                          //   double balanceAmount = double.parse(fund['currentBalance']);
-                          //   int itemNumber = index + 1;
-                          //   return fund['addedBy'] == 'customer'? Container(
-                          //       decoration: BoxDecoration(
-                          //           borderRadius: BorderRadius.circular(10),
-                          //           color: AppColors.liabilityItemsBackgroundColor.withOpacity(.4)
-                          //       ),
-                          //       child: Column(
-                          //         crossAxisAlignment: CrossAxisAlignment.end,
-                          //         children: [
-                          //           Row(
-                          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               Row(
-                          //                 children: [
-                          //                   Container(
-                          //                     width: 24,
-                          //                     height: 24,
-                          //                     decoration: const BoxDecoration(
-                          //                         color: AppColors.whiteColor,
-                          //                         shape: BoxShape.circle
-                          //                     ),
-                          //                     child: Center(
-                          //                       child: TextWidget(
-                          //                           text: itemNumber.toString(),
-                          //                           fontSize: 10,
-                          //                           fontWeight: FontWeight.bold,
-                          //                           fontColor: AppColors.secondaryColor,
-                          //                           textAlign: TextAlign.center),
-                          //                     ),
-                          //                   ),
-                          //                   Row(
-                          //                     children: [
-                          //                       TextWidget(
-                          //                           text: fund['status'],
-                          //                           fontSize: 12,
-                          //                           fontWeight: FontWeight.bold,
-                          //                           fontColor: fund['status'] == 'Include'?AppColors.textColorGreen2:AppColors.errorTextColor,
-                          //                           textAlign: TextAlign.center).paddingOnly(left: Get.width * .04),
-                          //                       // FlutterSwitch(
-                          //                       //   activeText: 'Include',
-                          //                       //   inactiveText: 'Exclude',
-                          //                       //   activeColor: AppColors.primaryColor,
-                          //                       //   inactiveColor: AppColors.blackColor.withOpacity(.1),
-                          //                       //   value: fund['status'] == 'Include'?true:false,
-                          //                       //   valueFontSize: 8.0,
-                          //                       //   width: Get.width * .12,
-                          //                       //   height: 20,
-                          //                       //   borderRadius: 30.0,
-                          //                       //   showOnOff: false,
-                          //                       //   toggleSize: 14,
-                          //                       //   onToggle: (val) {
-                          //                       //     if(fund['status'] == 'Include'){
-                          //                       //       FirestoreService().updateFundStatus(index, 'Exclude');
-                          //                       //     }else{
-                          //                       //       FirestoreService().updateFundStatus(index, 'Include');
-                          //                       //     }
-                          //                       //   },
-                          //                       // ).paddingOnly(left: Get.width * .04),
-                          //
-                          //                     ],
-                          //                   )
-                          //                 ],
-                          //               ),
-                          //
-                          //               Row(
-                          //                 children: [
-                          //                   InkWell(
-                          //                     onTap: (){
-                          //                       // FundDialog().editFundDialog(index,
-                          //                       //     fund['assetType'],
-                          //                       //     fund['accountNumber'],
-                          //                       //     fund['currentBalance'],
-                          //                       //     fund['bankName'],
-                          //                       //     fund['userVerifiedFund'],
-                          //                       //     controller,
-                          //                       //     fund['status']);
-                          //                     },
-                          //                     child: Container(
-                          //                         width: Get.width * .14,
-                          //                         height: 24,
-                          //                         decoration: BoxDecoration(
-                          //                             color: AppColors.secondaryColor,
-                          //                             borderRadius: BorderRadius.circular(1000)
-                          //                         ),
-                          //                         child: const Row(
-                          //                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //                           children: [
-                          //                             Icon(Icons.edit,size: 14,color: AppColors.whiteColor,),
-                          //                             Text('Edit',
-                          //                               style: TextStyle(
-                          //                                   fontSize: 8,
-                          //                                   color: AppColors.textColorWhite,
-                          //                                   fontWeight: FontWeight.bold
-                          //                               ),)
-                          //                             // TextWidget(
-                          //                             //     text: 'Trash',
-                          //                             //     fontSize: 4,
-                          //                             //     fontWeight: FontWeight.bold,
-                          //                             //     fontColor: AppColors.textColorWhite,
-                          //                             //     textAlign: TextAlign.center)
-                          //                           ],
-                          //                         ).marginSymmetric(horizontal: 8)
-                          //                     ),
-                          //                   ),
-                          //                   // SizedBox(width: Get.width * .04,),
-                          //                   // InkWell(
-                          //                   //   onTap: ()async{
-                          //                   //     FundDialog().removeFundDialog(index);
-                          //                   //   },
-                          //                   //   child: Container(
-                          //                   //       width: Get.width * .14,
-                          //                   //       height: 24,
-                          //                   //       decoration: BoxDecoration(
-                          //                   //           color: AppColors.deleteButtonBg,
-                          //                   //           borderRadius: BorderRadius.circular(1000)
-                          //                   //       ),
-                          //                   //       child: const Row(
-                          //                   //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //                   //         children: [
-                          //                   //           Icon(Icons.delete,size: 14,color: AppColors.whiteColor,),
-                          //                   //           Text('Trash',
-                          //                   //             style: TextStyle(
-                          //                   //                 fontSize: 8,
-                          //                   //                 color: AppColors.textColorWhite,
-                          //                   //                 fontWeight: FontWeight.bold
-                          //                   //             ),)
-                          //                   //         ],
-                          //                   //       ).marginSymmetric(horizontal: 6)
-                          //                   //   ),
-                          //                   // ),
-                          //                 ],
-                          //               )
-                          //             ],
-                          //           ),
-                          //           fund['assetType'] == 'Gift Funds - from Donor'? Row(
-                          //             crossAxisAlignment: CrossAxisAlignment.center,
-                          //             children: [
-                          //               Checkbox(
-                          //                   value: fund['userVerifiedFund'],
-                          //                   activeColor: AppColors.primaryColor,
-                          //                   onChanged: (value){
-                          //                     if(fund['userVerifiedFund'] == true){
-                          //                       FirestoreService().updateUserVerifyFundValue(borrowerId,index,false);
-                          //                     }else{
-                          //                       FirestoreService().updateUserVerifyFundValue(borrowerId,index,true);
-                          //                     }
-                          //                   }
-                          //               ),
-                          //               Flexible(
-                          //                 child: Text('I verify I shall receive these Gift Funds.',style: TextStyle(fontSize: 10,
-                          //                     color: fund['userVerifiedFund'] == true?AppColors.textColorGreen2:AppColors.redColor,
-                          //                     fontWeight: FontWeight.bold),),
-                          //               )
-                          //             ],
-                          //           ):const SizedBox(),
-                          //           // fund['userVerifiedFund'] == false? const Text('*This fund is under verification process. So it will be considered Excluded until its verified.',
-                          //           //   style: TextStyle(color: AppColors.redColor),).paddingOnly(top: 8):const SizedBox(),
-                          //           Row(
-                          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               TextWidget(
-                          //                   text: fund['assetType'],
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorBlack,
-                          //                   textAlign: TextAlign.center),
-                          //               TextWidget(
-                          //                   text: '\$${UtilMethods().formatNumberWithCommas(balanceAmount)}',
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorApp,
-                          //                   textAlign: TextAlign.center),
-                          //             ],
-                          //           ).paddingOnly(top: 4),
-                          //           Container(
-                          //             width: Get.width * 1,
-                          //             height: Get.height * .002,
-                          //             decoration: BoxDecoration(
-                          //                 color: AppColors.blackColor.withOpacity(.2)
-                          //             ),
-                          //           ).paddingOnly(top: 8),
-                          //           Row(
-                          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               const TextWidget(
-                          //                   text: 'Bank / Source :',
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorBlack,
-                          //                   textAlign: TextAlign.center),
-                          //               TextWidget(
-                          //                   text: fund['bankName'],
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorApp,
-                          //                   textAlign: TextAlign.center),
-                          //             ],
-                          //           ).paddingOnly(top: 12),
-                          //           Row(
-                          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               const TextWidget(
-                          //                   text: 'Account Number :',
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorBlack,
-                          //                   textAlign: TextAlign.center),
-                          //               TextWidget(
-                          //                   text: fund['accountNumber'] != ''?fund['accountNumber']: 'N/A',
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorApp,
-                          //                   textAlign: TextAlign.center),
-                          //             ],
-                          //           ).paddingOnly(top: 6),
-                          //
-                          //         ],
-                          //       ).paddingAll(8)
-                          //   ).paddingSymmetric(vertical: 4):
-                          //   Container(
-                          //       decoration: BoxDecoration(
-                          //           borderRadius: BorderRadius.circular(10),
-                          //           color: AppColors.liabilityItemsBackgroundColor.withOpacity(.4)
-                          //       ),
-                          //       child: Column(
-                          //         crossAxisAlignment: CrossAxisAlignment.end,
-                          //         children: [
-                          //           Row(
-                          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               Row(
-                          //                 children: [
-                          //                   Container(
-                          //                     width: 24,
-                          //                     height: 24,
-                          //                     decoration: const BoxDecoration(
-                          //                         color: AppColors.whiteColor,
-                          //                         shape: BoxShape.circle
-                          //                     ),
-                          //                     child: Center(
-                          //                       child: TextWidget(
-                          //                           text: itemNumber.toString(),
-                          //                           fontSize: 10,
-                          //                           fontWeight: FontWeight.bold,
-                          //                           fontColor: AppColors.secondaryColor,
-                          //                           textAlign: TextAlign.center),
-                          //                     ),
-                          //                   ),
-                          //
-                          //                 ],
-                          //               ),
-                          //               Row(
-                          //                 children: [
-                          //                   Container(
-                          //                       decoration:  BoxDecoration(
-                          //                           color: AppColors.whiteColor,
-                          //                           borderRadius: BorderRadius.circular(1000)
-                          //                       ),
-                          //                       child: Text(fund['verifyStatus'],style: TextStyle(fontWeight: FontWeight.bold,
-                          //                           color: fund['verifyStatus'] == 'Verified'?AppColors.greenColor:AppColors.secondaryColor
-                          //                       ),).paddingSymmetric(horizontal: 4)),
-                          //
-                          //                 ],
-                          //               )
-                          //             ],
-                          //           ),
-                          //           Row(
-                          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               TextWidget(
-                          //                   text: fund['assetType'],
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorBlack,
-                          //                   textAlign: TextAlign.center),
-                          //               TextWidget(
-                          //                   text: '\$${UtilMethods().formatNumberWithCommas(balanceAmount)}',
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorApp,
-                          //                   textAlign: TextAlign.center),
-                          //             ],
-                          //           ).paddingOnly(top: 12),
-                          //           Container(
-                          //             width: Get.width * 1,
-                          //             height: Get.height * .002,
-                          //             decoration: BoxDecoration(
-                          //                 color: AppColors.blackColor.withOpacity(.2)
-                          //             ),
-                          //           ).paddingOnly(top: 8),
-                          //           Row(
-                          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               const TextWidget(
-                          //                   text: 'Bank / Source :',
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorBlack,
-                          //                   textAlign: TextAlign.center),
-                          //               TextWidget(
-                          //                   text: fund['bankName'],
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorApp,
-                          //                   textAlign: TextAlign.center),
-                          //             ],
-                          //           ).paddingOnly(top: 12),
-                          //           Row(
-                          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               const TextWidget(
-                          //                   text: 'Account Number :',
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorBlack,
-                          //                   textAlign: TextAlign.center),
-                          //               TextWidget(
-                          //                   text: fund['accountNumber'] != ''?fund['accountNumber']: 'N/A',
-                          //                   fontSize: 14,
-                          //                   fontWeight: FontWeight.bold,
-                          //                   fontColor: AppColors.textColorApp,
-                          //                   textAlign: TextAlign.center),
-                          //             ],
-                          //           ).paddingOnly(top: 6),
-                          //         ],
-                          //       ).paddingAll(8)
-                          //   ).paddingSymmetric(vertical: 4);
-                          // },
-                        // );
                       },
                     )
                   )

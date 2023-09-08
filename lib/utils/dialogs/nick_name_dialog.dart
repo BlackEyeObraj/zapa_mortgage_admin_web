@@ -4,7 +4,7 @@ import 'package:zapa_mortgage_admin_web/services/firestore_service.dart';
 
 class NickNameDialog{
 
-addNickName(String userId, String nickName){
+addNickName(String userId, String nickName, String userName, String phoneNumber){
   final nickNameTextController = TextEditingController(text: nickName);
 
   return Get.defaultDialog(
@@ -38,7 +38,7 @@ addNickName(String userId, String nickName){
         Map<String, dynamic> updatedData = {
           'nickName': nickNameTextController.text,
         };
-        FirestoreService().addEditUserNickName(userId,updatedData);
+        FirestoreService().addEditUserNickName(userId,updatedData,nickNameTextController.text,userName,phoneNumber);
       }, child: Text('Add / Update')),
     cancel: TextButton(onPressed: () => Get.back(), child: Text('Cancel'))
   );

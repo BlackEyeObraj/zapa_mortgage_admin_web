@@ -32,4 +32,24 @@ class Constants{
     'Gift Funds - from Donor',
     'Other Source - Pending',
   ];
+  final List<String> workTypes = [
+    'Employment',
+    'Business / Self Employed',
+    'Other Income',
+  ];
+
+  final List<String> searchBy = [
+    'All',
+    'LOA',
+    'Borrower',
+  ];
+  final List<String> payPerCycleTypes = [
+    'Hourly',
+    'Weekly',
+    'Bi Weekly',
+    'Semi Monthly',
+    'Monthly',
+  ];
+  String note = 'If the additional income amount is added for just 1 w2 year then the amount will not be accepted/considered '
+      'in total additional w2 income (YTD).';
 }
