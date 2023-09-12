@@ -5,7 +5,7 @@ import '../../res/app_colors.dart';
 import '../../services/firestore_service.dart';
 
 class FicoDialog {
-  addFicoDialogue(String borrowerId,String value,String type) {
+  addFicoDialogue(String borrowerId,String value,String type, String borrowerName, String borrowerPhoneNumber) {
     final formKeyFico = GlobalKey<FormState>();
     final ficoScoreController = TextEditingController(text: value);
 
@@ -54,7 +54,7 @@ class FicoDialog {
                 child: ElevatedButton(
                     onPressed: () async{
                       if (formKeyFico.currentState!.validate()) {
-                        await FirestoreService().addFicoScore(borrowerId,ficoScoreController.text,type);
+                        await FirestoreService().addFicoScore(borrowerId,ficoScoreController.text,type,borrowerName,borrowerPhoneNumber);
                         Get.back();
                       }
                     },

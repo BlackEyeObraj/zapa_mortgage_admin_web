@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:zapa_mortgage_admin_web/controllers/form_1065_&_k1_calculator_controller.dart';
 
 import '../../res/app_colors.dart';
+import '../../services/firestore_service.dart';
 import '../snack_bar.dart';
 import '../utils_mehtods.dart';
 import '../widgets/text_widget.dart';
@@ -14,7 +15,8 @@ class Form10401065K1IncomeDialog{
   addIncome(String borrowerId){
     final controller = Form1065CalculatorController();
     controller.getCurrentAndPreviousYears();
-    
+    String verifyStatus = 'Verified';
+
     Get.dialog(
       Dialog(
         insetPadding: EdgeInsets.zero,
@@ -40,6 +42,34 @@ class Form10401065K1IncomeDialog{
                   height: Get.height * .001,
                   color: AppColors.primaryColor.withOpacity(.4),
                 ),
+                Obx(() => Row(
+                  children: [
+                    Expanded(
+                      child: RadioListTile(
+                        title: Text("Add as Processor"),
+                        value: "processor",
+                        groupValue: controller.selectedAddedBy.value,
+                        onChanged: (value){
+                          controller.selectedAddedBy.value = 'processor';
+                          controller.setVerifyCheck('verified', true);
+                          controller.setVerifyCheck('verifiedButExeCheck', false);
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: RadioListTile(
+                        title: Text("Add as Borrower"),
+                        value: "customer",
+                        groupValue: controller.selectedAddedBy.value,
+                        onChanged: (value){
+                          controller.selectedAddedBy.value = 'customer';
+                          controller.setVerifyCheck('verified', true);
+                          controller.setVerifyCheck('verifiedButExeCheck', false);
+                        },
+                      ),
+                    )
+                  ],
+                ),),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -666,6 +696,19 @@ class Form10401065K1IncomeDialog{
                                 fontColor: AppColors.primaryColor,
                                 textAlign: TextAlign.center),
                           ),
+                          Row(
+                            children: [
+                              Obx(() => Checkbox(
+                                  value: controller.moreThan5YearsOld,
+                                  onChanged: (value){
+                                    controller.setMoreThan5YearsOld(value!);
+                                  }
+                              ),),
+                              Expanded(
+                                  child: Text('My business Is more than 5 years old and I wish to use only 1 year , latest year income ${controller.w2Year}',
+                                    style: const TextStyle(fontSize: 12,fontWeight: FontWeight.bold),)),
+                            ],
+                          ).marginOnly(top: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -2305,52 +2348,24 @@ class Form10401065K1IncomeDialog{
                         color: AppColors.primaryColor.withOpacity(.4),
                       ).paddingOnly(top: 16, bottom: 16),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Text('No of months determine for average monthly income',)
-                          Expanded(
-                            child:
-                            Text('No. of months determine for average monthly income',
-                              textAlign: TextAlign.start,style: GoogleFonts.roboto(
-                                  fontSize: 12,fontWeight: FontWeight.w900,color: AppColors.primaryColor),),
+                      Obx(() =>controller.calculationMessage.isNotEmpty? Container(
+                          decoration: BoxDecoration(
+                              color: AppColors.viewColor.withOpacity(.8),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppColors.primaryColor,width: 1)
                           ),
-                        ],
-                      ).marginOnly(top: 8),
-                      Container(
-                        height: Get.height * .05,
-                        decoration: BoxDecoration(
-                          border:
-                          Border.all(color: Colors.black, width: 1.0),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: controller
-                                    .numberOfMonthsTextController,
-                                keyboardType: TextInputType.number,
-                                onChanged: (String value) {
-                                  controller.numberOfMonths.value = value.isNotEmpty? double.parse(value): 0.0;
-                                  controller.calculateMonthlyIncome();
-                                },
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  hintText: 'Enter Number of Months',
-                                  hintStyle: TextStyle(fontSize: 12),
-                                  border: InputBorder.none,
-                                  contentPadding:
-                                  const EdgeInsets.only(bottom: 4,left: 16),
-                                  prefixIconConstraints:
-                                  const BoxConstraints(
-                                      minWidth: 0, minHeight: 0),
-                                ),
+                          child: Column(
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.warning,color: AppColors.primaryColor,),
+                                  SizedBox(width: 8,),
+                                  Expanded(child: Text('Income Trend & Calculation',style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.primaryColor),))
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ).paddingOnly(top: Get.height * .004),
+                              Text(controller.calculationMessage),
+                            ],
+                          ).paddingAll(8)).marginOnly(top: 8):SizedBox()),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -2399,6 +2414,52 @@ class Form10401065K1IncomeDialog{
                     ],
                   ).paddingAll(8),
                 ),
+                Obx(() => controller.selectedAddedBy.value == 'processor' ?
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Row(
+                      children: [
+                        Obx(() =>  Checkbox(
+                            value: controller.verifiedCheck,
+                            onChanged: (value){
+                              if(controller.verifiedCheck == true){
+                                verifyStatus = 'Verified But Excluded';
+                                controller.setVerifyCheck('verified', false);
+                                controller.setVerifyCheck('verifiedButExcluded', true);
+                              }else{
+                                verifyStatus = 'Verified';
+                                controller.setVerifyCheck('verified', true);
+                                controller.setVerifyCheck('verifiedButExcluded', false);
+                              }
+                            }
+                        ),
+                        ),
+                        Text('Verified',style: TextStyle(fontSize: 12),)
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Obx(() => Checkbox(
+                            value: controller.verifiedButExeCheck,
+                            onChanged: (value){
+                              if(controller.verifiedButExeCheck == true){
+                                verifyStatus = 'Verified';
+                                controller.setVerifyCheck('verified', true);
+                                controller.setVerifyCheck('verifiedButExcluded', false);
+                              }else{
+                                verifyStatus = 'Verified But Excluded';
+                                controller.setVerifyCheck('verified', false);
+                                controller.setVerifyCheck('verifiedButExcluded', true);
+                              }
+                            }
+                        ),),
+                        Text('Verified But Excluded',style: TextStyle(fontSize: 12),)
+                      ],
+                    ),
+                  ],
+                ).marginOnly(top: 8):SizedBox(),
+                ),
                 GestureDetector(
                   onTap:()async{
                     if(controller.nameOfPartnerShipTextController.text.isEmpty){
@@ -2422,49 +2483,52 @@ class Form10401065K1IncomeDialog{
                     else if(controller.monthlyIncome == 0.0){
                       SnackBarApp().errorSnack('Info Incomplete', 'Please Enter No. of months to calculate average monthly income.');
                     }else{
-                      // FirestoreService().add10401065K1BusinessIncomeCalculator(
-                      //     controller.nameOfPartnerShipTextController.text,
-                      //     controller.principalBusinessActivityTextController.text,
-                      //     controller.principalProductOrServiceTextController.text,
-                      //     controller.businessNameTypeTextController.text,
-                      //     controller.businessStartDateTextController.text,
-                      //     incomeType,
-                      //     controller.currentlyActive.toString(),
-                      //     controller.w2IncomeFromSelfEmploymentPrior.toString(),
-                      //     controller.w2IncomeFromSelfEmploymentRecent.toString(),
-                      //     controller.ordinaryIncomeLossPrior.toString(),
-                      //     controller.guaranteedPaymentToPartnerPrior.toString(),
-                      //     controller.ordinaryIncomeLossRecent.toString(),
-                      //     controller.guaranteedPaymentToPartnerRecent.toString(),
-                      //     controller.ordinaryIncomeLossFromOtherPartnershipPrior.toString(),
-                      //     controller.nonRecurringOtherIncomeLossPrior.toString(),
-                      //     controller.depreciationPrior.toString(),
-                      //     controller.depletionPrior.toString(),
-                      //     controller.amortizationCasualtyLossOneTimeExpensePrior.toString(),
-                      //     controller.mortgagePayableInLessThanOneYearPrior.toString(),
-                      //     controller.mealsAndEntertainmentPrior.toString(),
-                      //     controller.ownershipPercentagePrior.toString(),
-                      //     controller.ordinaryIncomeLossFromOtherPartnershipRecent.toString(),
-                      //     controller.nonRecurringOtherIncomeLossRecent.toString(),
-                      //     controller.depreciationRecent.toString(),
-                      //     controller.depletionRecent.toString(),
-                      //     controller.amortizationCasualtyLossOneTimeExpenseRecent.toString(),
-                      //     controller.mortgagePayableInLessThanOneYearRecent.toString(),
-                      //     controller.mealsAndEntertainmentRecent.toString(),
-                      //     controller.ownershipPercentageRecent.toString(),
-                      //     controller.numberOfMonths.toString(),
-                      //     controller.baseYear,
-                      //     controller.w2Year,
-                      //     controller.priorW2Year,
-                      //     controller.businessStartDateStamp.value,
-                      //     controller.greaterOrLessThen2Years.value,
-                      //     controller.totalOfTaxReturnAndGrandTotalPrior,
-                      //     controller.totalOfTaxReturnAndGrandTotalRecent,
-                      //     controller.monthlyIncome,
-                      //     controller.addPartnershipReturnsPrior,
-                      //     controller.addPartnershipReturnsRecent
-                      //
-                      // );
+                      FirestoreService().add10401065K1BusinessIncomeCalculator(
+                        borrowerId,
+                          controller.nameOfPartnerShipTextController.text,
+                          controller.principalBusinessActivityTextController.text,
+                          controller.principalProductOrServiceTextController.text,
+                          controller.businessNameTypeTextController.text,
+                          controller.businessStartDateTextController.text,
+                          'Form 1065 & K1',
+                          controller.currentlyActive.toString(),
+                          controller.w2IncomeFromSelfEmploymentPrior.toString(),
+                          controller.w2IncomeFromSelfEmploymentRecent.toString(),
+                          controller.ordinaryIncomeLossPrior.toString(),
+                          controller.guaranteedPaymentToPartnerPrior.toString(),
+                          controller.ordinaryIncomeLossRecent.toString(),
+                          controller.guaranteedPaymentToPartnerRecent.toString(),
+                          controller.ordinaryIncomeLossFromOtherPartnershipPrior.toString(),
+                          controller.nonRecurringOtherIncomeLossPrior.toString(),
+                          controller.depreciationPrior.toString(),
+                          controller.depletionPrior.toString(),
+                          controller.amortizationCasualtyLossOneTimeExpensePrior.toString(),
+                          controller.mortgagePayableInLessThanOneYearPrior.toString(),
+                          controller.mealsAndEntertainmentPrior.toString(),
+                          controller.ownershipPercentagePrior.toString(),
+                          controller.ordinaryIncomeLossFromOtherPartnershipRecent.toString(),
+                          controller.nonRecurringOtherIncomeLossRecent.toString(),
+                          controller.depreciationRecent.toString(),
+                          controller.depletionRecent.toString(),
+                          controller.amortizationCasualtyLossOneTimeExpenseRecent.toString(),
+                          controller.mortgagePayableInLessThanOneYearRecent.toString(),
+                          controller.mealsAndEntertainmentRecent.toString(),
+                          controller.ownershipPercentageRecent.toString(),
+                          controller.numberOfMonths.toString(),
+                          controller.baseYear,
+                          controller.w2Year,
+                          controller.priorW2Year,
+                          controller.businessStartDateStamp.value,
+                          controller.greaterOrLessThen2Years.value,
+                          controller.totalOfTaxReturnAndGrandTotalPrior,
+                          controller.totalOfTaxReturnAndGrandTotalRecent,
+                          controller.monthlyIncome,
+                          controller.addPartnershipReturnsPrior,
+                          controller.addPartnershipReturnsRecent,
+                        controller.moreThan5YearsOld,
+                        verifyStatus,
+                        controller.selectedAddedBy.value,
+                      );
                     }
                   },
                   child: Container(

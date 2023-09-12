@@ -11,7 +11,7 @@ import '../snack_bar.dart';
 
 class FundDialog{
 
-  addFundDialog(String borrowerID){
+  addFundDialog(String borrowerID, String borrowerName, String borrowerPhoneNumber){
     final box = GetStorage();
     Get.put(FundsViewController()).selectedAssetTypeFund.value = '';
     Get.put(FundsViewController()).setSelectedAssetTypeEnableOrDisable(true);
@@ -281,7 +281,7 @@ class FundDialog{
                             bankNameController.text,
                             accountNumberController.text,
                             amountController.text,
-                            Get.put(FundsViewController()).selectedAssetTypeEnable,verifyStatus,box.read(Constants.USER_NAME));
+                            Get.put(FundsViewController()).selectedAssetTypeEnable,verifyStatus,box.read(Constants.USER_NAME),borrowerName,borrowerPhoneNumber);
                       }
                     },
                     style: ButtonStyle(
@@ -303,7 +303,7 @@ class FundDialog{
       ),
     );
   }
-  editFundDialog(String borrowerID,int index, String assetType,String accountNumber, String currentBalance, String bankName, bool userVerifiedFund,String status, String addedBy, String verifyStatusOld){
+  editFundDialog(String borrowerID,int index, String assetType,String accountNumber, String currentBalance, String bankName, bool userVerifiedFund,String status, String addedBy, String verifyStatusOld, String borrowerName, String borrowerPhoneNumber){
     final bankNameController = TextEditingController(text: bankName);
     final accountNumberController = TextEditingController(text: accountNumber);
     final amountController = TextEditingController(text:currentBalance);
@@ -580,7 +580,7 @@ class FundDialog{
                                Get.put(FundsViewController()).selectedAssetTypeFund.value,
                                Get.put(FundsViewController()).selectedAssetTypeEnable,
                                status,
-                           verifyStatus);
+                           verifyStatus,borrowerName,borrowerPhoneNumber);
 
                         // await FirestoreService().addFunds(Get.put(FundsViewController()).selectedAddedBy.value,borrowerID,
                         //     Get.put(FundsViewController()).selectedAssetTypeFund.value,
@@ -813,13 +813,13 @@ class FundDialog{
     // );
   }
 
-  removeFundDialog(int index, String borrowerId){
+  removeFundDialog(int index, String borrowerId, String assetType, String borrowerName, String borrowerPhoneNumber){
     Get.defaultDialog(
       title: 'Remove Fund',
       middleText: 'Are you sure want to remove fund',
       titleStyle: TextStyle(color: AppColors.primaryColor,fontSize: 16,fontWeight: FontWeight.bold),
       confirm: TextButton(onPressed: ()async{
-        await FirestoreService().removeFunds(index,borrowerId);
+        await FirestoreService().removeFunds(index,borrowerId,assetType,borrowerName,borrowerPhoneNumber);
 
       }, child: Text('Yes')),
       cancel: TextButton(onPressed: (){

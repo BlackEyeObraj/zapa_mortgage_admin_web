@@ -12,7 +12,9 @@ import '../../utils/widgets/text_widget.dart';
 
 class LiabilityView extends GetView<LiabilityViewController>{
   final String borrowerId;
-  LiabilityView({required this.borrowerId});
+  final String borrowerPhoneNumber;
+  final String borrowerName;
+  LiabilityView({required this.borrowerId,required this.borrowerPhoneNumber, required this.borrowerName});
   @override
   Widget build(BuildContext context) {
     return GetBuilder(
@@ -45,7 +47,7 @@ class LiabilityView extends GetView<LiabilityViewController>{
                       alignment: Alignment.centerRight,
                       child: InkWell(
                         onTap: (){
-                          LiabilityDialog().addLiabilityDialog(borrowerId,Get.put(LiabilityViewController()));
+                          LiabilityDialog().addLiabilityDialog(borrowerId,Get.put(LiabilityViewController()),borrowerName,borrowerPhoneNumber);
                         },
                         child: Container(
                           height: Get.height * 1,
@@ -481,7 +483,7 @@ class LiabilityView extends GetView<LiabilityViewController>{
                                                         liability['iKnow'],
                                                         liability['iDoNotKnow'],
                                                         liability['executionReason'] == null?'':liability['executionReason'],
-                                                          liability['verifyStatus']
+                                                          liability['verifyStatus'],borrowerName,borrowerPhoneNumber
                                                       );
                                                     },
                                                     child: Container(
@@ -507,7 +509,7 @@ class LiabilityView extends GetView<LiabilityViewController>{
                                                   ),
                                                   InkWell(
                                                     onTap: ()async{
-                                                      // LiabilityDialog().removeLiabilityDialog(index);
+                                                      LiabilityDialog().removeLiabilityDialog(index,borrowerId,liability['name'],borrowerName,borrowerPhoneNumber);
                                                     },
                                                     child: Container(
                                                         width: Get.width * .04,
@@ -723,7 +725,7 @@ class LiabilityView extends GetView<LiabilityViewController>{
                                                             liability['iKnow'],
                                                             liability['iDoNotKnow'],
                                                               liability['executionReason'] == null?'':liability['executionReason'],
-                                                              liability['verifyStatus']
+                                                              liability['verifyStatus'],borrowerName,borrowerPhoneNumber
 
                                                           );
                                                         },
@@ -750,7 +752,7 @@ class LiabilityView extends GetView<LiabilityViewController>{
                                                       ),
                                                       InkWell(
                                                         onTap: ()async{
-                                                          // LiabilityDialog().removeLiabilityDialog(index);
+                                                          LiabilityDialog().removeLiabilityDialog(index,borrowerId,liability['name'],borrowerName,borrowerPhoneNumber);
                                                         },
                                                         child: Container(
                                                             width: Get.width * .04,

@@ -781,6 +781,19 @@ class SchCIncomeDialog{
                                 .marginOnly(top: 8),
                           ),
                           Row(
+                            children: [
+                              Obx(() => Checkbox(
+                                  value: controller.moreThan5YearsOld,
+                                  onChanged: (value){
+                                    controller.setMoreThan5YearsOld(value!);
+                                  }
+                              ),),
+                              Expanded(
+                                  child: Text('My business Is more than 5 years old and I wish to use only 1 year , latest year income ${controller.w2Year}',
+                                    style: const TextStyle(fontSize: 12,fontWeight: FontWeight.bold),)),
+                            ],
+                          ).marginOnly(top: 8),
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
@@ -1500,61 +1513,26 @@ class SchCIncomeDialog{
                         height: Get.height * .001,
                         color: AppColors.primaryColor.withOpacity(.4),
                       ).paddingOnly(top: 16, bottom: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Text('No of months determine for average monthly income',)
-                          Expanded(
-                            child:
-                            Text('No. of months determine for average monthly income',
-                              textAlign: TextAlign.start,style: GoogleFonts.roboto(
-                                  fontSize: 12,fontWeight: FontWeight.w900,color: AppColors.primaryColor),),
+
+                      Obx(() =>controller.calculationMessage.isNotEmpty? Container(
+                          decoration: BoxDecoration(
+                              color: AppColors.viewColor.withOpacity(.8),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppColors.primaryColor,width: 1)
                           ),
-                          // TextWidget(
-                          //     text: "No. of months determine for average monthly income",
-                          //     fontSize: 12,
-                          //     fontWeight: FontWeight.w900,
-                          //     fontColor: AppColors.primaryColor,
-                          //     textAlign: TextAlign.center),
-                        ],
-                      ).marginOnly(top: 8),
-                      Container(
-                        height: Get.height * .05,
-                        decoration: BoxDecoration(
-                          border:
-                          Border.all(color: Colors.black, width: 1.0),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: controller
-                                    .numberOfMonthsTextController,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.deny(RegExp('-')), // Disallow the minus sign "-"
+                          child: Column(
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.warning,color: AppColors.primaryColor,),
+                                  SizedBox(width: 8,),
+                                  Expanded(child: Text('Income Trend & Calculation',style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.primaryColor),))
                                 ],
-                                onChanged: (String value) {
-                                  controller.numberOfMonths.value = value.isNotEmpty? double.parse(value): 0.0;
-                                  controller.calculateSubTotalAmount('monthly');
-                                },
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  hintText: 'Enter Number of Months',
-                                  hintStyle: TextStyle(fontSize: 12),
-                                  border: InputBorder.none,
-                                  contentPadding:
-                                  const EdgeInsets.only(bottom: 4,left: 16),
-                                  prefixIconConstraints:
-                                  const BoxConstraints(
-                                      minWidth: 0, minHeight: 0),
-                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ).paddingOnly(top: Get.height * .004),
+                              Text(controller.calculationMessage),
+                            ],
+                          ).paddingAll(8)).marginOnly(top: 8):SizedBox()),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -1702,7 +1680,8 @@ class SchCIncomeDialog{
                           controller.subtotalRecent,
                           controller.monthlyIncome,
                         verifyStatus,
-                        controller.selectedAddedBy.value
+                        controller.selectedAddedBy.value,
+                          controller.moreThan5YearsOld
 
                       );
                     }

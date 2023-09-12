@@ -37,7 +37,9 @@ class SummaryViewController extends GetxController{
   }
 
 
-  setSummaryValue(String borrowerId){
+  setSummaryValue(String borrowerId, String borrowerName, String borrowerPhoneNumber){
+    final box = GetStorage();
+    FirestoreService().historyDataAdd("${box.read(Constants.USER_NAME)} has viewed ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName}.");
     _subscription = FirestoreService()
         .calculateTotalVerifiedIncomesListener(borrowerId)
         .listen((value) {

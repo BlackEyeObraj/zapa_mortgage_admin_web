@@ -12,7 +12,7 @@ import '../utils_mehtods.dart';
 
 class LiabilityDialog{
 
-  addLiabilityDialog(String borrowerId, LiabilityViewController controller){
+  addLiabilityDialog(String borrowerId, LiabilityViewController controller, String borrowerName, String borrowerPhoneNumber){
     final box = GetStorage();
     final liabilityNameController = TextEditingController();
     final liabilityMonthlyAmountController = TextEditingController();
@@ -452,7 +452,7 @@ class LiabilityDialog{
                                 liabilityRemainingMonthController.text,
                                 verifyStatus,selectedExcludedReason,box.read(Constants.USER_NAME),
                             controller.idoKnow.value,
-                            controller.idoNotKnow.value);
+                            controller.idoNotKnow.value,borrowerName,borrowerPhoneNumber);
                         }
                       }else if(controller.selectedLiabilityType.value == 'Installment (Student)'){
                         if(liabilityUnpaidBalanceAmountController.text.isEmpty){
@@ -472,7 +472,7 @@ class LiabilityDialog{
                               liabilityUnpaidBalanceAmountController.text,
                               liabilityRemainingMonthController.text,verifyStatus,selectedExcludedReason,box.read(Constants.USER_NAME),
                               controller.idoKnow.value,
-                              controller.idoNotKnow.value);
+                              controller.idoNotKnow.value,borrowerName,borrowerPhoneNumber);
                         }
                       }
 
@@ -516,7 +516,7 @@ class LiabilityDialog{
   }
 
   editLiabilityDialog(String addedBy,String borrowerId,int index, String name, String amountMonthly, String type, String amountBalance, String monthRemaining,
-      String status, LiabilityViewController liabilityController, bool iKnow, bool iDoNotKnow, String executionReason, String verifyStatusOld
+      String status, LiabilityViewController liabilityController, bool iKnow, bool iDoNotKnow, String executionReason, String verifyStatusOld, String borrowerName, String borrowerPhoneNumber
       )async{
     final liabilityNameController = TextEditingController(text: name);
     final liabilityMonthlyAmountController = TextEditingController(text: amountMonthly);
@@ -534,7 +534,7 @@ class LiabilityDialog{
     String verifyStatus = verifyStatusOld;
 
     Get.defaultDialog(
-      title: 'Add New Liability',
+      title: 'Edit Liability',
       titleStyle: const TextStyle(fontSize: 16,
           fontWeight: FontWeight.bold,
           color: AppColors.textColorBlack),
@@ -967,7 +967,7 @@ class LiabilityDialog{
                               verifyStatus,
                               selectedExcludedReason,
                               liabilityController.idoKnow.value,
-                              liabilityController.idoNotKnow.value);
+                              liabilityController.idoNotKnow.value,borrowerName,borrowerPhoneNumber);
                         }
                       }else if(liabilityController.selectedLiabilityType.value == 'Installment (Student)'){
                         if(liabilityUnpaidBalanceAmountController.text.isEmpty){
@@ -990,7 +990,7 @@ class LiabilityDialog{
                               verifyStatus,
                               selectedExcludedReason,
                               liabilityController.idoKnow.value,
-                              liabilityController.idoNotKnow.value);
+                              liabilityController.idoNotKnow.value,borrowerName,borrowerPhoneNumber);
                         }
                       }
 
@@ -1398,5 +1398,20 @@ class LiabilityDialog{
     //   ),
     // );
 
+  }
+
+  removeLiabilityDialog(int index, String borrowerId, String liabilityName, String borrowerName, String borrowerPhoneNumber){
+    Get.defaultDialog(
+      title: 'Remove Liability',
+      middleText: 'Are you sure want to remove liability',
+      titleStyle: const TextStyle(color: AppColors.primaryColor,fontSize: 16,fontWeight: FontWeight.bold),
+      confirm: TextButton(onPressed: ()async{
+        await FirestoreService().removeLiability(index,borrowerId,liabilityName,borrowerName,borrowerPhoneNumber);
+
+      }, child: const Text('Yes')),
+      cancel: TextButton(onPressed: (){
+        Get.back();
+      }, child: const Text('No')),
+    );
   }
 }

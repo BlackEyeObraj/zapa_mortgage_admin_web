@@ -296,10 +296,10 @@ class UserDetailPage extends GetView<UserDetailPageController>{
                       width: Get.width * 1,
                       height: Get.height * 1,
                       child: controller.selectedTab == 'Summary'?SummaryView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,borrowerName: controller.borrowerName,):
-                      controller.selectedTab == 'FICO'?FicoView(borrowerId: controller.borrowerId,):
+                      controller.selectedTab == 'FICO'?FicoView(borrowerId: controller.borrowerId,borrowerName: controller.borrowerName,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
                       controller.selectedTab == 'Income'?IncomeView(borrowerId: controller.borrowerId,):
-                      controller.selectedTab == 'Liability'?LiabilityView(borrowerId: controller.borrowerId,):
-                      controller.selectedTab == 'Funds'?FundsView(borrowerId: controller.borrowerId,):
+                      controller.selectedTab == 'Liability'?LiabilityView(borrowerId: controller.borrowerId,borrowerName: controller.borrowerName,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
+                      controller.selectedTab == 'Funds'?FundsView(borrowerId: controller.borrowerId,borrowerName: controller.borrowerName,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
                       controller.selectedTab == 'coBorrowers'?CoBorrowerView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
                       controller.selectedTab == 'BorrowerDiscussions'?BorrowerDiscussionView(borrowerId: controller.borrowerId,adminId: GetStorage().read(Constants.USER_ID),):SizedBox(),
                     ))

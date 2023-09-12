@@ -9,7 +9,9 @@ import '../../utils/dialogs/fico_dialog.dart';
 
 class FicoView extends GetView<FicoViewController>{
   final String borrowerId;
-  FicoView({required this.borrowerId});
+  final String borrowerPhoneNumber;
+  final String borrowerName;
+  FicoView({required this.borrowerId,required this.borrowerPhoneNumber, required this.borrowerName});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +73,7 @@ class FicoView extends GetView<FicoViewController>{
                                       Text(zapaScoreValue ?? '0',
                                         style: TextStyle(fontSize: 100,fontWeight: FontWeight.bold,color: AppColors.primaryColor),),
                                       IconButton(onPressed: (){
-                                        FicoDialog().addFicoDialogue(borrowerId,zapaScoreValue ?? '0','zapa');
+                                        FicoDialog().addFicoDialogue(borrowerId,zapaScoreValue ?? '0','zapa',borrowerName,borrowerPhoneNumber);
                                       }, icon: Icon(Icons.edit,color: AppColors.secondaryColor,))
                                     ],
                                   ),
@@ -118,7 +120,7 @@ class FicoView extends GetView<FicoViewController>{
                                       Text(userScoreValue?? '0',
                                         style: TextStyle(fontSize: 100,fontWeight: FontWeight.bold,color: AppColors.primaryColor),),
                                       IconButton(onPressed: (){
-                                        FicoDialog().addFicoDialogue(borrowerId,userScoreValue ?? '0','borrower');
+                                        FicoDialog().addFicoDialogue(borrowerId,userScoreValue ?? '0','borrower',borrowerName,borrowerPhoneNumber);
 
                                       }, icon: Icon(Icons.edit,color: AppColors.secondaryColor,))
                                     ],

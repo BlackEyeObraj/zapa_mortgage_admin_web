@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:zapa_mortgage_admin_web/utils/constants.dart';
 import 'package:zapa_mortgage_admin_web/utils/dialogs/otp_dialog.dart';
+import 'package:zapa_mortgage_admin_web/utils/snack_bar.dart';
 
 enum SignResponseReturns {
   loginSuccess,
@@ -61,14 +62,26 @@ class FirestoreService extends GetxService {
       //   codeAutoRetrievalTimeout: (String verificationId) {
       //   },
       // );
-      ConfirmationResult confirmationResult = await auth.signInWithPhoneNumber(phoneNumber);
-      print(confirmationResult.verificationId);
-      OtpDialog().otpDialog(borrowerName, confirmationResult.verificationId,confirmationResult,auth);
+      if(await phoneNumberExists(phoneNumber)){
+        SnackBarApp().errorSnack('Already Exist', 'This phone number already exist.');
+      }else{
+        ConfirmationResult confirmationResult = await auth.signInWithPhoneNumber(phoneNumber);
+        print(confirmationResult.verificationId);
+        OtpDialog().otpDialog(borrowerName, confirmationResult.verificationId,confirmationResult,auth);
+      }
       // verifyOtpCode(confirmationResult.verificationId, 'otpCode', borrowerName,confirmationResult);
     }catch(e){
       print(e.toString());
     }
 
+  }
+  Future<bool> phoneNumberExists(String phoneNumber) async {
+    final QuerySnapshot result = await FirebaseFirestore.instance
+        .collection('users')
+        .where('phoneNumber', isEqualTo: phoneNumber)
+        .get();
+
+    return result.docs.isNotEmpty;
   }
   verifyOtpCode(String verificationId, String otpCode,String borrowerName, ConfirmationResult confirmationResult, FirebaseAuth auth) async {
     UserCredential userCredential = await confirmationResult.confirm(otpCode);
@@ -92,6 +105,7 @@ class FirestoreService extends GetxService {
       'ourAgent' : '',
       'agentCheckBorrower' : '',
     });
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has change created new Borrower Account ( Borrower Name: $borrowerName , Borrower Phone number: $userPhoneNumber)");
     await auth.signOut();
     Get.back();
     Get.back();
@@ -179,6 +193,7 @@ class FirestoreService extends GetxService {
             setLoginStatus(uid,'true');
             await FirebaseFirestore.instance
                 .collection('AdminMembers').doc(uid).update({'loginStatus': 'true'});
+            await historyDataAdd("${box.read(Constants.USER_NAME)} has logged in.");
             return SignResponseReturns.loginSuccess;
           }
           return SignResponseReturns.accountNotActive;
@@ -197,13 +212,15 @@ class FirestoreService extends GetxService {
     await FirebaseFirestore.instance
         .collection('AdminMembers').doc(uid).update({'loginStatus': status});
   }
-  setLastEngagementDateTime(String uid,String dateTime)async{
+  setLastEngagementDateTime(String uid,String dateTime, String borrowerName, String borrowerPhoneNumber)async{
     await FirebaseFirestore.instance
         .collection('users').doc(uid).update({'lastEngagement': dateTime});
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has set last Engagement of ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} on $dateTime.");
   }
-  setNextEngagementDateTime(String uid,String dateTime)async{
+  setNextEngagementDateTime(String uid,String dateTime, String borrowerName, String borrowerPhoneNumber)async{
     await FirebaseFirestore.instance
         .collection('users').doc(uid).update({'nextEngagement': dateTime});
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has set next Engagement of ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} on $dateTime.");
 
   }
   setLastViewedBy(String uid,String name, DateTime dateTime)async{
@@ -213,9 +230,10 @@ class FirestoreService extends GetxService {
       'lastViewTimeBy':dateTime.toString()
         });
   }
-  setUserAssignedTo(String uid,String name)async{
+  setUserAssignedTo(String uid,String name, String borrowerName, String borrowerPhoneNumber)async{
     await FirebaseFirestore.instance
         .collection('users').doc(uid).update({'assignedTo': name});
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has assigned ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} to $name.");
   }
   Future<List<String>> fetchAdminUsers() async {
     List<String> items = [];
@@ -257,6 +275,7 @@ class FirestoreService extends GetxService {
     });
     String docId = docRef.id;
     await docRef.update({'id': docId});
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has added a remark.");
     Get.back();
   }
   // addMessage(String borrowerId,String message) async {
@@ -302,6 +321,7 @@ class FirestoreService extends GetxService {
     DocumentReference docReference = collectionReference.doc(documentId);
     try {
       await docReference.update(updatedData);
+      await historyDataAdd("${box.read(Constants.USER_NAME)} has edited his remark.");
       print('Document updated successfully');
       Get.back();
     } catch (e) {
@@ -366,6 +386,7 @@ class FirestoreService extends GetxService {
     try {
       await docReference.delete();
       print('Document deleted successfully');
+      await historyDataAdd("${box.read(Constants.USER_NAME)} has deleted his remark.");
       Get.back();
     } catch (e) {
       print('Error deleting document: $e');
@@ -385,6 +406,18 @@ class FirestoreService extends GetxService {
   getRemarksAndNotes(){
     CollectionReference remarksAndNotes = FirebaseFirestore.instance.collection('RemarksAndNotes');
     return remarksAndNotes.orderBy('addedDateTime', descending: true);
+  }
+  getHistory(String pickedDate){
+    CollectionReference remarksAndNotes = FirebaseFirestore.instance.collection('History');
+    if(pickedDate.isEmpty){
+      return remarksAndNotes.orderBy('timestamp', descending: true);
+    }else{
+      return remarksAndNotes.where('formattedDate',isEqualTo: pickedDate);
+    }
+  }
+  getHistoryFiltered(String pickedDate){
+    CollectionReference remarksAndNotes = FirebaseFirestore.instance.collection('History');
+    return remarksAndNotes.where('formattedDate',isEqualTo: pickedDate);
   }
   getMessages(String borrowerId){
     CollectionReference remarksAndNotes = FirebaseFirestore.instance.collection('users').doc(borrowerId).collection('Messages');
@@ -610,7 +643,7 @@ class FirestoreService extends GetxService {
       yield double.parse(totalAmount.toStringAsFixed(2));
     }
   }
-  addFicoScore(String borrowerId,String ficoScore,String type) async {
+  addFicoScore(String borrowerId,String ficoScore,String type, String borrowerName, String borrowerPhoneNumber) async {
     String userId = borrowerId;
     DocumentSnapshot userSnapshot = await firestore.collection('users').doc(userId).get();
     Map<String, dynamic>? userData = userSnapshot.data() as Map<String, dynamic>?;
@@ -628,6 +661,8 @@ class FirestoreService extends GetxService {
         };
       }
       await firestore.collection('users').doc(userId).set(userData);
+      await historyDataAdd("${box.read(Constants.USER_NAME)} has entered Borrower FICO ( $ficoScore ) for ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} .");
+
     }else{
       if (userData == null) {
         userData = {
@@ -642,6 +677,7 @@ class FirestoreService extends GetxService {
         };
       }
       await firestore.collection('users').doc(userId).set(userData);
+      await historyDataAdd("${box.read(Constants.USER_NAME)} has entered Zapa Mortgage FICO ( $ficoScore ) for ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} .");
     }
 
 
@@ -708,7 +744,7 @@ class FirestoreService extends GetxService {
     // await Get.put(HomeScreenController()).setTotal();
 
   }
-  addFunds(String selectedAddedBy,String borrowerId,String assetType, String nameOfBank, String accountNumber, String currentBalance, bool userVerifiedFund, String verifyStatus, String addedByName)async{
+  addFunds(String selectedAddedBy,String borrowerId,String assetType, String nameOfBank, String accountNumber, String currentBalance, bool userVerifiedFund, String verifyStatus, String addedByName, String borrowerName, String borrowerPhoneNumber)async{
     await firestore
         .collection('users')
         .doc(borrowerId)
@@ -729,9 +765,10 @@ class FirestoreService extends GetxService {
       ])
     });
     // Get.put(HomeScreenController()).setTotal();
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has added fund / asset Named as ( $assetType ) for ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} .");
     Get.back();
   }
-  Future<void> updateFundValues(String selectedAddedBy,String borrowerId,int index, String bankName, String accountNumber, String currentBalance, String assetType, bool selectedAssetTypeEnable, String status, String verifyStatus) async {
+  Future<void> updateFundValues(String selectedAddedBy,String borrowerId,int index, String bankName, String accountNumber, String currentBalance, String assetType, bool selectedAssetTypeEnable, String status, String verifyStatus, String borrowerName, String borrowerPhoneNumber) async {
     String userId = borrowerId;
     CollectionReference usersCollection =
     FirebaseFirestore.instance.collection('users');
@@ -753,9 +790,10 @@ class FirestoreService extends GetxService {
     await usersCollection.doc(userId).update({
       'funds': liabilities,
     });
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has edited fund / asset Named as ( $assetType ) for ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} .");
     Get.back();
   }
-  Future<void> removeFunds(int index, String borrowerID) async {
+  Future<void> removeFunds(int index, String borrowerID, String assetType, String borrowerName, String borrowerPhoneNumber) async {
       CollectionReference usersCollection =
       FirebaseFirestore.instance.collection('users');
       DocumentSnapshot<Object?> snapshot =
@@ -767,6 +805,7 @@ class FirestoreService extends GetxService {
       await usersCollection.doc(borrowerID).update({
         'funds': liabilities,
       });
+      await historyDataAdd("${box.read(Constants.USER_NAME)} has removed fund / asset Named as ( $assetType ) for ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} .");
       // await Get.put(HomeScreenController()).setTotal();
       Get.back();
 
@@ -957,7 +996,7 @@ class FirestoreService extends GetxService {
     });
     // Get.put(HomeScreenController()).setTotal();
   }
-  addLiability(String selectedAddedBy,String borrowerId,String liabilityName, String monthlyAmount, String selectedLiabilityType, String balanceAmount, String monthRemaining, String verifyStatus, String selectedExcludedReason, String addedByName, bool idoKnow, bool idoNotKnow) async {
+  addLiability(String selectedAddedBy,String borrowerId,String liabilityName, String monthlyAmount, String selectedLiabilityType, String balanceAmount, String monthRemaining, String verifyStatus, String selectedExcludedReason, String addedByName, bool idoKnow, bool idoNotKnow, String borrowerName, String borrowerPhoneNumber) async {
     await firestore
         .collection('users')
         .doc(borrowerId)
@@ -980,10 +1019,12 @@ class FirestoreService extends GetxService {
         }
       ])
     });
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has added liability Named as ( $liabilityName ) for ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} .");
     // Get.put(HomeScreenController()).setTotal();
+
     Get.back();
   }
-  Future<void> updateLiabilityValues(int index, String selectedAddedBy,String borrowerId,String liabilityName, String monthlyAmount, String selectedLiabilityType, String balanceAmount, String monthRemaining, String verifyStatus, String selectedExcludedReason, bool idoKnow, bool idoNotKnow) async {
+  Future<void> updateLiabilityValues(int index, String selectedAddedBy,String borrowerId,String liabilityName, String monthlyAmount, String selectedLiabilityType, String balanceAmount, String monthRemaining, String verifyStatus, String selectedExcludedReason, bool idoKnow, bool idoNotKnow, String borrowerName, String borrowerPhoneNumber) async {
     CollectionReference usersCollection =
     FirebaseFirestore.instance.collection('users');
 
@@ -1006,9 +1047,25 @@ class FirestoreService extends GetxService {
     await usersCollection.doc(borrowerId).update({
       'liability': liabilities,
     });
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has edited liability Named as ( $liabilityName ) for ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} .");
+
     Get.back();
     // Get.put(HomeScreenController()).setTotal();
+  }
+  Future<void> removeLiability(int index, String borrowerId, String liabilityName, String borrowerName, String borrowerPhoneNumber) async {
+      String userId = borrowerId;
+      CollectionReference usersCollection = FirebaseFirestore.instance.collection('users');
+      DocumentSnapshot<Object?> snapshot = await usersCollection.doc(userId).get();
+      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+      List<dynamic> liabilities = data['liability'];
+      liabilities.removeAt(index);
 
+      await usersCollection.doc(userId).update({
+        'liability': liabilities,
+      });
+      // await Get.put(HomeScreenController()).setTotal();
+      await historyDataAdd("${box.read(Constants.USER_NAME)} has removed liability Named as ( $liabilityName ) for ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} .");
+      Get.back();
   }
   Future<void> updateFundStatus(String borrowerId,int index, String newStatus) async {
     String userId = borrowerId;
@@ -1435,7 +1492,7 @@ class FirestoreService extends GetxService {
       String w2year,
       String priorW2Year,
       String businessStartDateStamp,
-      String greaterOrLessThen2Years, double subtotalPrior, double subtotalRecent, double monthlyIncome, String verifyStatus, String selectedAddedBy
+      String greaterOrLessThen2Years, double subtotalPrior, double subtotalRecent, double monthlyIncome, String verifyStatus, String selectedAddedBy, bool moreThan5YearsOld
       )async{
     await firestore
         .collection('users')
@@ -1480,18 +1537,124 @@ class FirestoreService extends GetxService {
           'businessStartDateStamp':businessStartDateStamp,
           'greaterOrLessThen2Years':greaterOrLessThen2Years,
           'includeIt':greaterOrLessThen2Years ==  'true'?true:false,
-          'verifyStatus':verifyStatus
+          'verifyStatus':verifyStatus,
+          'moreThan5YearsOld':moreThan5YearsOld.toString()
         }
       ])
     });
     Get.back();
     Get.back();
   }
+  add10401065K1BusinessIncomeCalculator(
+      String borrowerId,
+      String nameOfPartnerShip,
+      String principalBusinessActivity,
+      String principalProductOrService,
+      String businessNameType,
+      String businessStartDate,
+      String incomeType,
+      String currentlyActive,
+      String w2IncomeFromSelfEmploymentPrior,
+      String w2IncomeFromSelfEmploymentRecent,
+      String ordinaryIncomeLossPrior,
+      String guaranteedPaymentToPartnerPrior,
+      String ordinaryIncomeLossRecent,
+      String guaranteedPaymentToPartnerRecent,
+      String ordinaryIncomeLossFromOtherPartnershipPrior,
+      String nonRecurringOtherIncomeLossPrior,
+      String depreciationPrior,
+      String depletionPrior,
+      String amortizationCasualtyLossOneTimeExpensePrior,
+      String mortgagePayableInLessThanOneYearPrior,
+      String mealsAndEntertainmentPrior,
+      String ownershipPercentagePrior,
+      String ordinaryIncomeLossFromOtherPartnershipRecent,
+      String nonRecurringOtherIncomeLossRecent,
+      String depreciationRecent,
+      String depletionRecent,
+      String amortizationCasualtyLossOneTimeExpenseRecent,
+      String mortgagePayableInLessThanOneYearRecent,
+      String mealsAndEntertainmentRecent,
+      String ownershipPercentageRecent,
+      String numberOfMonths,
+      String baseYear,
+      String w2year,
+      String priorW2Year,
+      String businessStartDateStamp,
+      String greaterOrLessThen2Years,
+      double totalOfTaxReturnAndGrandTotalPrior,
+      double totalOfTaxReturnAndGrandTotalRecent,
+      double monthlyIncome,
+      bool addPartnershipReturnsPrior,
+      bool addPartnershipReturnsRecent,
+      bool moreThan5YearsOld, String verifyStatus, String selectedAddedBy
+      )async{
+    await firestore
+        .collection('users')
+        .doc(borrowerId)
+        .update({
+      'incomes': FieldValue.arrayUnion([
+        {
+          'type':'business',
+          'addedBy':selectedAddedBy,
+          'nameOfPartnerShip': nameOfPartnerShip,
+          'principalBusinessActivity': principalBusinessActivity,
+          'principalProductOrService': principalProductOrService,
+          'companyName': businessNameType,
+          'w2IncomeFromSelfEmploymentPrior': w2IncomeFromSelfEmploymentPrior,
+          'w2IncomeFromSelfEmploymentRecent': w2IncomeFromSelfEmploymentRecent,
+          'ordinaryIncomeLossPrior': ordinaryIncomeLossPrior,
+          'guaranteedPaymentToPartnerPrior': guaranteedPaymentToPartnerPrior,
+          'ordinaryIncomeLossRecent': ordinaryIncomeLossRecent,
+          'guaranteedPaymentToPartnerRecent': guaranteedPaymentToPartnerRecent,
+          'ordinaryIncomeLossFromOtherPartnershipPrior': ordinaryIncomeLossFromOtherPartnershipPrior,
+          'nonRecurringOtherIncomeLossPrior': nonRecurringOtherIncomeLossPrior,
+          'depletionPrior': depletionPrior,
+          'depreciationPrior': depreciationPrior,
+          'amortizationCasualtyLossOneTimeExpensePrior': amortizationCasualtyLossOneTimeExpensePrior,
+          'mortgagePayableInLessThanOneYearPrior': mortgagePayableInLessThanOneYearPrior,
+          'mealsAndEntertainmentPrior': mealsAndEntertainmentPrior,
+          'ownershipPercentagePrior': ownershipPercentagePrior,
+          'ordinaryIncomeLossFromOtherPartnershipRecent': ordinaryIncomeLossFromOtherPartnershipRecent,
+          'nonRecurringOtherIncomeLossRecent': nonRecurringOtherIncomeLossRecent,
+          'depletionRecent': depletionRecent,
+          'depreciationRecent': depreciationRecent,
+          'amortizationCasualtyLossOneTimeExpenseRecent': amortizationCasualtyLossOneTimeExpenseRecent,
+          'mortgagePayableInLessThanOneYearRecent': mortgagePayableInLessThanOneYearRecent,
+          'mealsAndEntertainmentRecent': mealsAndEntertainmentRecent,
+          'ownershipPercentageRecent': ownershipPercentageRecent,
+          'numberOfMonths': numberOfMonths,
+          'grossAnnualIncome': '${totalOfTaxReturnAndGrandTotalRecent + totalOfTaxReturnAndGrandTotalPrior}'.toString(),
+          'monthlyIncome': monthlyIncome.toString(),
+          'addPartnershipReturnsPrior': addPartnershipReturnsPrior.toString(),
+          'addPartnershipReturnsRecent': addPartnershipReturnsRecent.toString(),
+          'startDate': businessStartDate,
+          'currentlyActive': currentlyActive,
+          'status':currentlyActive == 'true' && greaterOrLessThen2Years ==  'true'?'Include':'Exclude',
+          'addedType': 'calculator',
+          'employerIncomeType': incomeType,
+          'timestamp':DateTime.now(),
+          'salaryCycle':'Monthly',
+          'baseYear':baseYear,
+          'w2Year':w2year,
+          'priorW2Year':priorW2Year,
+          'businessStartDateStamp':businessStartDateStamp,
+          'greaterOrLessThen2Years':greaterOrLessThen2Years,
+          'includeIt':greaterOrLessThen2Years ==  'true'?true:false,
+          'verifyStatus':verifyStatus,
+          'moreThan5YearsOld':moreThan5YearsOld.toString()
 
+        }
+      ])
+    });
+    Get.back();
+    Get.back();
+  }
   historyDataAdd(String message)async{
     await firestore.collection('History').add({
       'message':message,
-      'timestamp':DateTime.now()
+      'timestamp':DateTime.now(),
+      'formattedDate':'${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}'
     });
   }
 }

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../utils/utils_mehtods.dart';
+
 class Form1065CalculatorController extends GetxController{
 
   final RxString _baseYear = ''.obs;
   final RxString _w2Year = ''.obs;
   final RxString _priorW2Year = ''.obs;
   final RxBool _currentlyActive = true.obs;
+  final RxBool _moreThan5YearsOld = false.obs;
+  final RxString selectedAddedBy = 'processor'.obs;
+
   final RxBool _addPartnershipReturnsRecent = true.obs;
   final RxBool _addPartnershipReturnsPrior = true.obs;
 
@@ -68,7 +73,10 @@ class Form1065CalculatorController extends GetxController{
 
   RxString  businessStartDateStamp = ''.obs;
   RxString  greaterOrLessThen2Years = ''.obs;
+  final RxString _calculationMessage = ''.obs;
 
+  final RxBool _verifiedCheck = true.obs;
+  final RxBool _verifiedButExeCheck = false.obs;
 
   final nameOfPartnerShipTextController = TextEditingController();
   final principalBusinessActivityTextController = TextEditingController();
@@ -134,6 +142,11 @@ class Form1065CalculatorController extends GetxController{
   double get totalOfTaxReturnAndGrandTotalPrior => _totalOfTaxReturnAndGrandTotalPrior.value;
 
   double get monthlyIncome => _monthlyIncome.value;
+  String get calculationMessage => _calculationMessage.value;
+  bool get moreThan5YearsOld => _moreThan5YearsOld.value;
+  bool get verifiedCheck => _verifiedCheck.value;
+  bool get verifiedButExeCheck => _verifiedButExeCheck.value;
+
 
   @override
   void onInit() async{
@@ -254,15 +267,90 @@ class Form1065CalculatorController extends GetxController{
       }
     }
     }
-    calculateMonthlyIncome(){
-      double sumOfGrandTotals = _totalOfTaxReturnAndGrandTotalRecent.value + _totalOfTaxReturnAndGrandTotalPrior.value;
-      double checkInfinity = sumOfGrandTotals / numberOfMonths.value;
-      if (checkInfinity.isInfinite) {
-        _monthlyIncome.value = 0.0; // Set to a default value for infinity
-      } else if (checkInfinity.isNaN) {
-        _monthlyIncome.value = 0.0; // Set to a default value for NaN
-      } else {
-        _monthlyIncome.value = checkInfinity;
+
+  calculateMonthlyIncome(){
+    if(!_moreThan5YearsOld.value){
+      if(_totalOfTaxReturnAndGrandTotalPrior.value == _totalOfTaxReturnAndGrandTotalRecent.value && _totalOfTaxReturnAndGrandTotalPrior.value != 0.0 && _totalOfTaxReturnAndGrandTotalRecent.value != 0.0){
+        double total= _totalOfTaxReturnAndGrandTotalPrior.value + _totalOfTaxReturnAndGrandTotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('1', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else if(_totalOfTaxReturnAndGrandTotalPrior.value < _totalOfTaxReturnAndGrandTotalRecent.value && _totalOfTaxReturnAndGrandTotalPrior.value != 0.0 && _totalOfTaxReturnAndGrandTotalRecent.value != 0.0){
+        double total= _totalOfTaxReturnAndGrandTotalPrior.value + _totalOfTaxReturnAndGrandTotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('2', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else if(_totalOfTaxReturnAndGrandTotalPrior.value > _totalOfTaxReturnAndGrandTotalRecent.value && _totalOfTaxReturnAndGrandTotalPrior.value != 0.0 && _totalOfTaxReturnAndGrandTotalRecent.value != 0.0){
+        double total= _totalOfTaxReturnAndGrandTotalRecent.value;
+        _monthlyIncome.value =total/12;
+        setCalculationMessage('3', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else if(_totalOfTaxReturnAndGrandTotalPrior.value == 0.0 && _totalOfTaxReturnAndGrandTotalRecent.value != 0.0){
+        double total= _totalOfTaxReturnAndGrandTotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('4', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else if(_totalOfTaxReturnAndGrandTotalPrior.value != 0.0 && _totalOfTaxReturnAndGrandTotalRecent.value == 0.0){
+        _monthlyIncome.value = 0.0;
+        setCalculationMessage('5', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else{
+        _monthlyIncome.value = 0.0;
+        setCalculationMessage('7', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+    }else{
+      if(_totalOfTaxReturnAndGrandTotalPrior.value == 0.0 && _totalOfTaxReturnAndGrandTotalRecent.value != 0.0){
+        double total= _totalOfTaxReturnAndGrandTotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('6', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }else if(_totalOfTaxReturnAndGrandTotalPrior.value != 0.0 && _totalOfTaxReturnAndGrandTotalRecent.value != 0.0){
+        double total= _totalOfTaxReturnAndGrandTotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('6', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }else{
+        _monthlyIncome.value = 0.0;
+        setCalculationMessage('7', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
       }
     }
+
+  }
+  setCalculationMessage(String condition, double subTotalPrior ,double subTotalRecent, String w2Year, String w2PriorYear, double monthlyIncome){
+    if(condition == '1'){
+      _calculationMessage.value =
+      'Trend is average. Based on years $w2PriorYear & $w2Year income.\n'
+          '${UtilMethods().formatNumberWithCommas(subTotalPrior)} + ${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 24 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '2'){
+      _calculationMessage.value =
+      'Trend is increasing. Based on years $w2PriorYear & $w2Year income.\n'
+          '${UtilMethods().formatNumberWithCommas(subTotalPrior)} + ${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 24 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '3'){
+      _calculationMessage.value =
+      'Trend is declining. Based on years $w2PriorYear & $w2Year income. So the income of $w2Year will be considered.\n'
+          '${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 12 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '4'){
+      _calculationMessage.value =
+      'Trend is only set for one year. Based on year $w2Year income.\n'
+          '${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 24 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '5'){
+      _calculationMessage.value =
+      'Trend is only set for one year $w2PriorYear only. So the monthly income is considered \$0.00 for not providing $w2Year income.';
+    }else if(condition == '6'){
+      _calculationMessage.value =
+      'if your business is more than 5 years old then trend is only set for one year $w2Year only. So the monthly income is considered as \n${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 24 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '7'){
+      _calculationMessage.value = '';
+    }
+  }
+  setMoreThan5YearsOld(bool value){
+    _moreThan5YearsOld.value = value;
+    calculateMonthlyIncome();
+  }
+  setVerifyCheck(String type, bool value){
+    if(type == 'verified'){
+      _verifiedCheck.value = value;
+    }else{
+      _verifiedButExeCheck.value = value;
+    }
+
+  }
 }

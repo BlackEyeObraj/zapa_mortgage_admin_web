@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:zapa_mortgage_admin_web/utils/utils_mehtods.dart';
 
 import '../services/firestore_service.dart';
 
@@ -16,6 +17,7 @@ class Form1040CalculatorController extends GetxController{
 
   RxString  businessStartDateStamp = ''.obs;
   RxString  greaterOrLessThen2Years = ''.obs;
+  final RxBool _moreThan5YearsOld = false.obs;
 
 
   /// recent Sch C
@@ -45,6 +47,8 @@ class Form1040CalculatorController extends GetxController{
   final RxDouble _subtotalPrior = 0.0.obs;
 
   final RxDouble _monthlyIncome = 0.0.obs;
+  final RxString _calculationMessage = ''.obs;
+
   final RxBool _verifiedCheck = true.obs;
   final RxBool _verifiedButExeCheck = false.obs;
 
@@ -91,6 +95,8 @@ class Form1040CalculatorController extends GetxController{
   double get monthlyIncome => _monthlyIncome.value;
   bool get verifiedCheck => _verifiedCheck.value;
   bool get verifiedButExeCheck => _verifiedButExeCheck.value;
+  String get calculationMessage => _calculationMessage.value;
+  bool get moreThan5YearsOld => _moreThan5YearsOld.value;
 
   @override
   void onInit() async{
@@ -115,48 +121,132 @@ class Form1040CalculatorController extends GetxController{
     _depRatePrior.value = await FirestoreService().getDepreciationRateForPriorYear(priorW2Year);
   }
 
-   calculateSubTotalAmount(String type) {
+  calculateSubTotalAmount(String type) {
     if(type == 'recent'){
       double calculatedNonDeductibleRecent = -mealsAndEntertainmentExclusionRecent.value;
       _subtotalRecent.value = netProfitLossRecent.value + nonRecurringRecent.value + depletionRecent.value + depreciationRecent.value + businessUseOfHomeRecent.value + amortizationCasualtyLossOneTimeExpenseRecent.value + calculatedNonDeductibleRecent + (businessMilesRecent.value * depRateLatest);
-      double sumOfGrandTotals = _subtotalRecent.value + _subtotalPrior.value;
-      double checkInfinity = sumOfGrandTotals / numberOfMonths.value;
-      if (checkInfinity.isInfinite) {
-        _monthlyIncome.value = 0.0; // Set to a default value for infinity
-      } else if (checkInfinity.isNaN) {
-        _monthlyIncome.value = 0.0; // Set to a default value for NaN
-      } else {
-        _monthlyIncome.value = checkInfinity;
-      }
+      // double sumOfGrandTotals = _subtotalRecent.value + _subtotalPrior.value;
+      // double checkInfinity = sumOfGrandTotals / numberOfMonths.value;
+      // if (checkInfinity.isInfinite) {
+      //   _monthlyIncome.value = 0.0; // Set to a default value for infinity
+      // } else if (checkInfinity.isNaN) {
+      //   _monthlyIncome.value = 0.0; // Set to a default value for NaN
+      // } else {
+      //   _monthlyIncome.value = checkInfinity;
+      // }
+      calculateMonthlyIncome();
     }else if(type == 'prior'){
       double calculatedNonDeductiblePrior = -mealsAndEntertainmentExclusionPrior.value;
       _subtotalPrior.value = netProfitLossPrior.value + nonRecurringPrior.value + depletionPrior.value + depreciationPrior.value + businessUseOfHomePrior.value + amortizationCasualtyLossOneTimeExpensePrior.value + calculatedNonDeductiblePrior + (businessMilesPrior.value * depRatePrior);
-      double sumOfGrandTotals = _subtotalRecent.value + _subtotalPrior.value;
-      double checkInfinity = sumOfGrandTotals / numberOfMonths.value;
-      if (checkInfinity.isInfinite) {
-        _monthlyIncome.value = 0.0; // Set to a default value for infinity
-      } else if (checkInfinity.isNaN) {
-        _monthlyIncome.value = 0.0; // Set to a default value for NaN
-      } else {
-        _monthlyIncome.value = checkInfinity;
+      // double sumOfGrandTotals = _subtotalRecent.value + _subtotalPrior.value;
+      // double checkInfinity = sumOfGrandTotals / numberOfMonths.value;
+      // if (checkInfinity.isInfinite) {
+      //   _monthlyIncome.value = 0.0; // Set to a default value for infinity
+      // } else if (checkInfinity.isNaN) {
+      //   _monthlyIncome.value = 0.0; // Set to a default value for NaN
+      // } else {
+      //   _monthlyIncome.value = checkInfinity;
+      // }
+      calculateMonthlyIncome();
+    }
+    // else{
+    //   double sumOfGrandTotals = _subtotalRecent.value + _subtotalPrior.value;
+    //   double checkInfinity = sumOfGrandTotals / numberOfMonths.value;
+    //   if (checkInfinity.isInfinite) {
+    //     _monthlyIncome.value = 0.0; // Set to a default value for infinity
+    //   } else if (checkInfinity.isNaN) {
+    //     _monthlyIncome.value = 0.0; // Set to a default value for NaN
+    //   } else {
+    //     _monthlyIncome.value = checkInfinity;
+    //   }
+    // }
+  }
+
+  void calculateMonthlyIncome() {
+    if(!_moreThan5YearsOld.value){
+      if(_subtotalPrior.value == _subtotalRecent.value && _subtotalPrior.value != 0.0 && _subtotalRecent.value != 0.0){
+        double total= _subtotalPrior.value + _subtotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('1', _subtotalPrior.value, _subtotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else if(_subtotalPrior.value < _subtotalRecent.value && _subtotalPrior.value != 0.0 && _subtotalRecent.value != 0.0){
+        double total= _subtotalPrior.value + _subtotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('2', _subtotalPrior.value, _subtotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else if(_subtotalPrior.value > _subtotalRecent.value && _subtotalPrior.value != 0.0 && _subtotalRecent.value != 0.0){
+        double total= _subtotalRecent.value;
+        _monthlyIncome.value =total/12;
+        setCalculationMessage('3', _subtotalPrior.value, _subtotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else if(_subtotalPrior.value == 0.0 && _subtotalRecent.value != 0.0){
+        double total= _subtotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('4', _subtotalPrior.value, _subtotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else if(_subtotalPrior.value != 0.0 && _subtotalRecent.value == 0.0){
+        _monthlyIncome.value = 0.0;
+        setCalculationMessage('5', _subtotalPrior.value, _subtotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }
+      else{
+        _monthlyIncome.value = 0.0;
+        setCalculationMessage('7', _subtotalPrior.value, _subtotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
       }
     }else{
-      double sumOfGrandTotals = _subtotalRecent.value + _subtotalPrior.value;
-      double checkInfinity = sumOfGrandTotals / numberOfMonths.value;
-      if (checkInfinity.isInfinite) {
-        _monthlyIncome.value = 0.0; // Set to a default value for infinity
-      } else if (checkInfinity.isNaN) {
-        _monthlyIncome.value = 0.0; // Set to a default value for NaN
-      } else {
-        _monthlyIncome.value = checkInfinity;
+      if(_subtotalPrior.value == 0.0 && _subtotalRecent.value != 0.0){
+        double total= _subtotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('6', _subtotalPrior.value, _subtotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }else if(_subtotalPrior.value != 0.0 && _subtotalRecent.value != 0.0){
+        double total= _subtotalRecent.value;
+        _monthlyIncome.value =total/24;
+        setCalculationMessage('6', _subtotalPrior.value, _subtotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
+      }else{
+        _monthlyIncome.value = 0.0;
+        setCalculationMessage('7', _subtotalPrior.value, _subtotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
       }
     }
   }
+
+  setCalculationMessage(String condition, double subTotalPrior ,double subTotalRecent, String w2Year, String w2PriorYear, double monthlyIncome){
+    if(condition == '1'){
+      _calculationMessage.value =
+      'Trend is average. Based on years $w2PriorYear & $w2Year income.\n'
+          '${UtilMethods().formatNumberWithCommas(subTotalPrior)} + ${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 24 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '2'){
+      _calculationMessage.value =
+      'Trend is increasing. Based on years $w2PriorYear & $w2Year income.\n'
+          '${UtilMethods().formatNumberWithCommas(subTotalPrior)} + ${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 24 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '3'){
+      _calculationMessage.value =
+      'Trend is declining. Based on years $w2PriorYear & $w2Year income. So the income of $w2Year will be considered.\n'
+          '${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 12 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '4'){
+      _calculationMessage.value =
+      'Trend is only set for one year. Based on year $w2Year income.\n'
+          '${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 24 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '5'){
+      _calculationMessage.value =
+      'Trend is only set for one year $w2PriorYear only. So the monthly income is considered \$0.00 for not providing $w2Year income.';
+    }else if(condition == '6'){
+      _calculationMessage.value =
+      'if your business is more than 5 years old then trend is only set for one year $w2Year only. So the monthly income is considered as \n${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 24 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+    }else if(condition == '7'){
+      _calculationMessage.value = '';
+    }
+  }
+  setMoreThan5YearsOld(bool value){
+    _moreThan5YearsOld.value = value;
+    calculateMonthlyIncome();
+  }
+
+
   setVerifyCheck(String type, bool value){
     if(type == 'verified'){
       _verifiedCheck.value = value;
     }else{
       _verifiedButExeCheck.value = value;
     }
+
   }
 }

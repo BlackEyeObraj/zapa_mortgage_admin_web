@@ -61,8 +61,9 @@ class DashBoardPageController extends GetxController{
     _selectedTab.value = option;
   }
 
-  logout(){
+  logout()async{
     final box = GetStorage();
+    await FirestoreService().historyDataAdd("${box.read(Constants.USER_NAME)} has logged out.");
     box.write(Constants.USER_ID, '');
     box.write(Constants.USER_NAME, '');
     box.write(Constants.USER_EMAIL, '');

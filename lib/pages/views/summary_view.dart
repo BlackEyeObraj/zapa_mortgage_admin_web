@@ -22,7 +22,7 @@ class SummaryView extends GetView<SummaryViewController>{
     return GetBuilder(
       init: SummaryViewController(),
         builder: (controller){
-        controller.setSummaryValue(borrowerId);
+        controller.setSummaryValue(borrowerId,borrowerName,borrowerPhoneNumber);
           return Scaffold(
           body: SizedBox(
             width: Get.width * 1,
@@ -147,6 +147,8 @@ class SummaryView extends GetView<SummaryViewController>{
                                         }
                                         var userData = snapshot.data!.data() as Map<String, dynamic>;
                                         var assignedTo = userData['assignedTo'] as String;
+                                        // var borrowerName = userData['userName'] as String;
+                                        // var borrowerPhoneNumber = userData['phoneNumber'] as String;
                                         return InkWell(
                                           onTap: ()async{
                                             List<String> adminUsers = await FirestoreService().fetchAdminUsers();
@@ -166,7 +168,7 @@ class SummaryView extends GetView<SummaryViewController>{
                                               if (selectedItem != null) {
                                                 print('Selected item: $selectedItem');
                                                 // Handle the selected item here
-                                                FirestoreService().setUserAssignedTo(borrowerId, selectedItem.toString());
+                                                FirestoreService().setUserAssignedTo(borrowerId, selectedItem.toString(),borrowerName,borrowerPhoneNumber);
                                               } else {
                                                 print('No item selected');
                                                 // Handle the case where no item is selected
@@ -296,7 +298,7 @@ class SummaryView extends GetView<SummaryViewController>{
                                                   print(formattedDate);
                                                   print(formattedTime);
                                                   String value = '${formattedDate} / ${formattedTime}';
-                                                  FirestoreService().setLastEngagementDateTime(borrowerId, value);
+                                                  FirestoreService().setLastEngagementDateTime(borrowerId, value,borrowerName,borrowerPhoneNumber);
                                                 }
                                               }else{
 
@@ -360,7 +362,7 @@ class SummaryView extends GetView<SummaryViewController>{
                                                     print(formattedDate);
                                                     print(formattedTime);
                                                     String value = '${formattedDate} / ${formattedTime}';
-                                                    FirestoreService().setNextEngagementDateTime(borrowerId, value);
+                                                    FirestoreService().setNextEngagementDateTime(borrowerId, value,borrowerName,borrowerPhoneNumber);
                                                   }
                                                 }else{
 

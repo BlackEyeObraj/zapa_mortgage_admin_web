@@ -14,7 +14,9 @@ import '../../utils/widgets/text_widget.dart';
 
 class FundsView extends GetView<FundsViewController>{
   final String borrowerId;
-  FundsView({required this.borrowerId});
+  final String borrowerPhoneNumber;
+  final String borrowerName;
+  FundsView({required this.borrowerId,required this.borrowerPhoneNumber, required this.borrowerName});
   @override
   Widget build(BuildContext context) {
     return GetBuilder(
@@ -120,7 +122,7 @@ class FundsView extends GetView<FundsViewController>{
                           ).marginOnly(left: 16),
                           InkWell(
                             onTap: (){
-                              FundDialog().addFundDialog(borrowerId);
+                              FundDialog().addFundDialog(borrowerId,borrowerName,borrowerPhoneNumber);
 
                             },
                             child: Container(
@@ -479,7 +481,7 @@ class FundsView extends GetView<FundsViewController>{
                                                           fund['userVerifiedFund'],
                                                           fund['status'],
                                                           fund['addedBy'],
-                                                          fund['verifyStatus'],
+                                                          fund['verifyStatus'],borrowerName,borrowerPhoneNumber
                                                       );
                                                     },
                                                     child: Container(
@@ -506,7 +508,7 @@ class FundsView extends GetView<FundsViewController>{
                                                   InkWell(
                                                     onTap: ()async{
                                                       // LiabilityDialog().removeLiabilityDialog(index);
-                                                      FundDialog().removeFundDialog(index,borrowerId);
+                                                      FundDialog().removeFundDialog(index,borrowerId,fund['assetType'],borrowerName,borrowerPhoneNumber);
                                                     },
                                                     child: Container(
                                                         width: Get.width * .04,
@@ -652,7 +654,6 @@ class FundsView extends GetView<FundsViewController>{
                                                       textAlign: TextAlign.center),
                                                 ),
                                               ),
-
                                             ],
                                           ),
                                           Row(
@@ -682,7 +683,7 @@ class FundsView extends GetView<FundsViewController>{
                                                             fund['userVerifiedFund'],
                                                             fund['status'],
                                                             fund['addedBy'],
-                                                            fund['verifyStatus'],
+                                                            fund['verifyStatus'],borrowerName,borrowerPhoneNumber
                                                           );
                                                         },
                                                         child: Container(
@@ -708,7 +709,7 @@ class FundsView extends GetView<FundsViewController>{
                                                       ),
                                                       InkWell(
                                                         onTap: ()async{
-                                                          FundDialog().removeFundDialog(index,borrowerId);
+                                                          FundDialog().removeFundDialog(index,borrowerId,fund['assetType'],borrowerName,borrowerPhoneNumber);
                                                         },
                                                         child: Container(
                                                             width: Get.width * .04,
