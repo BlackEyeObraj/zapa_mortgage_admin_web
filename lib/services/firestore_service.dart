@@ -217,11 +217,17 @@ class FirestoreService extends GetxService {
         .collection('users').doc(uid).update({'lastEngagement': dateTime});
     await historyDataAdd("${box.read(Constants.USER_NAME)} has set last Engagement of ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} on $dateTime.");
   }
-  setNextEngagementDateTime(String uid,String dateTime, String borrowerName, String borrowerPhoneNumber)async{
+  setNextEngagementDateTime(String uid,String dateTime, String borrowerName, String borrowerPhoneNumber, String date)async{
     await FirebaseFirestore.instance
-        .collection('users').doc(uid).update({'nextEngagement': dateTime});
+        .collection('users').doc(uid).update({'nextEngagement': dateTime,'todayEngagement': date,'engagementStatus': ''});
     await historyDataAdd("${box.read(Constants.USER_NAME)} has set next Engagement of ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} on $dateTime.");
 
+  }
+  setEngagementStatus(String uid, String userName, String phoneNumber)async{
+    await FirebaseFirestore.instance
+        .collection('users').doc(uid).update({'engagementStatus': 'Engaged'});
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has set Engagement Status of ${userName.isEmpty?phoneNumber:userName} to Engaged.");
+    Get.back();
   }
   setLastViewedBy(String uid,String name, DateTime dateTime)async{
     await FirebaseFirestore.instance
@@ -234,6 +240,11 @@ class FirestoreService extends GetxService {
     await FirebaseFirestore.instance
         .collection('users').doc(uid).update({'assignedTo': name});
     await historyDataAdd("${box.read(Constants.USER_NAME)} has assigned ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} to $name.");
+  }
+  setUserLeadStage(String uid,String name, String borrowerName, String borrowerPhoneNumber)async{
+    await FirebaseFirestore.instance
+        .collection('users').doc(uid).update({'leadStage': name});
+    await historyDataAdd("${box.read(Constants.USER_NAME)} has changed lead stage of ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName} to $name.");
   }
   Future<List<String>> fetchAdminUsers() async {
     List<String> items = [];
@@ -254,16 +265,50 @@ class FirestoreService extends GetxService {
     });
     return items;
   }
-  getUsers(String value){
-    if(value.isEmpty || value == 'All'){
+  getUsers(String selectedLOA, String selectedLeadStage){
+    print('LOA: $selectedLOA');
+    print('Lead Stage: $selectedLeadStage');
+    if(selectedLOA.isEmpty || selectedLOA == 'All' && selectedLeadStage.isEmpty){
       Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users');
+      print('object1');
       return users;
-    }else{
+    }else if(selectedLOA.isNotEmpty){
       Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
-          .where('assignedTo',isEqualTo: value);
+          .where('assignedTo',isEqualTo: selectedLOA);
+      print('object2');
+      return users;
+    }else if(selectedLeadStage.isNotEmpty){
+      Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+          .where('leadStage',isEqualTo: selectedLeadStage);
+      print('object3');
       return users;
     }
 
+      // Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+      // .where('leadStage',isEqualTo: 'Negotiation');
+      // print('object3');
+      // return users;
+  }
+  getFilterAll(){
+    Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users');
+    print('object1');
+    return users;
+  }
+  getFilterLOA(String selectedLOA){
+    Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+        .where('assignedTo',isEqualTo: selectedLOA);
+    print('object2');
+    return users;
+  }
+  getFilterLeadStage(String leadStage){
+    Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+        .where('leadStage',isEqualTo: leadStage);
+    print('object2');
+    return users;
+  }
+  getUsersTodayEngagement(String date){
+      Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users').where('todayEngagement',isEqualTo: date);
+      return users;
   }
 
   addRemarksAndNotes(String remarkAndNote) async {
@@ -690,11 +735,12 @@ class FirestoreService extends GetxService {
         .map((snapshot) => snapshot);
   }
   Stream<DocumentSnapshot<Map<String, dynamic>>> getFunds(String borrowerId, String searchFilter) async* {
-    yield* FirebaseFirestore.instance
-        .collection('users')
-        .doc(borrowerId)
-        .snapshots()
-        .map((snapshot) => snapshot);
+      yield* FirebaseFirestore.instance
+          .collection('users')
+          .doc(borrowerId)
+          .snapshots()
+          .map((snapshot) => snapshot);
+
   }
 
   // Stream<QuerySnapshot<Map<String, dynamic>>> getFunds(String borrowerId, String searchFilter) {
@@ -1644,6 +1690,210 @@ class FirestoreService extends GetxService {
           'verifyStatus':verifyStatus,
           'moreThan5YearsOld':moreThan5YearsOld.toString()
 
+        }
+      ])
+    });
+    Get.back();
+    Get.back();
+  }
+  add10401120SK1BusinessIncomeCalculator(
+      String borrowerId,
+      String nameOfPartnerShip,
+      String sElectionEffectiveDate,
+      String businessNameType,
+      String businessStartDate,
+      String incomeType,
+      String currentlyActive,
+      String w2IncomeFromSelfEmploymentPrior,
+      String w2IncomeFromSelfEmploymentRecent,
+      String ordinaryIncomeLossPrior,
+      String ordinaryIncomeLossRecent,
+      String nonRecurringOtherIncomeLossPrior,
+      String depreciationPrior,
+      String depletionPrior,
+      String amortizationCasualtyLossOneTimeExpensePrior,
+      String mortgagePayableInLessThanOneYearPrior,
+      String mealsAndEntertainmentPrior,
+      String ownershipPercentagePrior,
+      String nonRecurringOtherIncomeLossRecent,
+      String depreciationRecent,
+      String depletionRecent,
+      String amortizationCasualtyLossOneTimeExpenseRecent,
+      String mortgagePayableInLessThanOneYearRecent,
+      String mealsAndEntertainmentRecent,
+      String ownershipPercentageRecent,
+      String numberOfMonths,
+      String baseYear,
+      String w2year,
+      String priorW2Year,
+      String businessStartDateStamp,
+      String greaterOrLessThen2Years,
+      double totalOfTaxReturnAndGrandTotalPrior,
+      double totalOfTaxReturnAndGrandTotalRecent,
+      double monthlyIncome,
+      bool addPartnershipReturnsPrior,
+      bool addPartnershipReturnsRecent,
+      bool moreThan5YearsOld, String verifyStatus, String selectedAddedBy
+
+      )async{
+    await firestore
+        .collection('users')
+        .doc(borrowerId)
+        .update({
+      'incomes': FieldValue.arrayUnion([
+        {
+          'type':'business',
+          'addedBy':selectedAddedBy,
+          'nameOfPartnerShip': nameOfPartnerShip,
+          'sElectionEffectiveDate': sElectionEffectiveDate,
+          'companyName': businessNameType,
+          'w2IncomeFromSelfEmploymentPrior': w2IncomeFromSelfEmploymentPrior,
+          'w2IncomeFromSelfEmploymentRecent': w2IncomeFromSelfEmploymentRecent,
+          'ordinaryIncomeLossPrior': ordinaryIncomeLossPrior,
+          'ordinaryIncomeLossRecent': ordinaryIncomeLossRecent,
+          'nonRecurringOtherIncomeLossPrior': nonRecurringOtherIncomeLossPrior,
+          'depletionPrior': depletionPrior,
+          'depreciationPrior': depreciationPrior,
+          'amortizationCasualtyLossOneTimeExpensePrior': amortizationCasualtyLossOneTimeExpensePrior,
+          'mortgagePayableInLessThanOneYearPrior': mortgagePayableInLessThanOneYearPrior,
+          'mealsAndEntertainmentPrior': mealsAndEntertainmentPrior,
+          'ownershipPercentagePrior': ownershipPercentagePrior,
+          'nonRecurringOtherIncomeLossRecent': nonRecurringOtherIncomeLossRecent,
+          'depletionRecent': depletionRecent,
+          'depreciationRecent': depreciationRecent,
+          'amortizationCasualtyLossOneTimeExpenseRecent': amortizationCasualtyLossOneTimeExpenseRecent,
+          'mortgagePayableInLessThanOneYearRecent': mortgagePayableInLessThanOneYearRecent,
+          'mealsAndEntertainmentRecent': mealsAndEntertainmentRecent,
+          'ownershipPercentageRecent': ownershipPercentageRecent,
+          'numberOfMonths': numberOfMonths,
+          'grossAnnualIncome': '${totalOfTaxReturnAndGrandTotalRecent + totalOfTaxReturnAndGrandTotalPrior}'.toString(),
+          'monthlyIncome': monthlyIncome.toString(),
+          'addPartnershipReturnsPrior': addPartnershipReturnsPrior.toString(),
+          'addPartnershipReturnsRecent': addPartnershipReturnsRecent.toString(),
+          'startDate': businessStartDate,
+          'currentlyActive': currentlyActive,
+          'status':currentlyActive == 'true' && greaterOrLessThen2Years ==  'true'?'Include':'Exclude',
+          'addedType': 'calculator',
+          'employerIncomeType': incomeType,
+          'timestamp':DateTime.now(),
+          'salaryCycle':'Monthly',
+          'baseYear':baseYear,
+          'w2Year':w2year,
+          'priorW2Year':priorW2Year,
+          'businessStartDateStamp':businessStartDateStamp,
+          'greaterOrLessThen2Years':greaterOrLessThen2Years,
+          'includeIt':greaterOrLessThen2Years ==  'true'?true:false,
+          'verifyStatus':verifyStatus,
+          'moreThan5YearsOld':moreThan5YearsOld.toString()
+
+        }
+      ])
+    });
+    Get.back();
+    Get.back();
+  }
+  add10401120BusinessIncomeCalculator(
+      String borrowerId,
+      String name,
+      String businessNameType,
+      String businessStartDate,
+      String incomeType,
+      String currentlyActive,
+      String w2IncomeFromSelfEmploymentPrior,
+      String w2IncomeFromSelfEmploymentRecent,
+      String taxableIncomePrior,
+      String totalTaxPrior,
+      String nonRecurringGainLossPrior,
+      String nonRecurringOtherIncomeLossPrior,
+      String depreciationPrior,
+      String depletionPrior,
+      String amortizationCasualtyLossOneTimeExpensePrior,
+      String netOperatingLossAndSpecialDeductionsPrior,
+      String mortgagePayableInLessThanOneYearPrior,
+      String mealsAndEntertainmentPrior,
+      String ownershipPercentagePrior,
+      String dividendsPaidToBorrowerPrior,
+      String taxableIncomeRecent,
+      String totalTaxRecent,
+      String nonRecurringGainLossRecent,
+      String nonRecurringOtherIncomeLossRecent,
+      String depreciationRecent,
+      String depletionRecent,
+      String amortizationCasualtyLossOneTimeExpenseRecent,
+      String netOperatingLossAndSpecialDeductionsRecent,
+      String mortgagePayableInLessThanOneYearRecent,
+      String mealsAndEntertainmentRecent,
+      String ownershipPercentageRecent,
+      String dividendsPaidToBorrowerRecent,
+      String numberOfMonths,
+      String baseYear,
+      String w2year,
+      String priorW2Year,
+      String businessStartDateStamp,
+      String greaterOrLessThen2Years,
+      double totalOfTaxReturnAndGrandTotalPrior,
+      double totalOfTaxReturnAndGrandTotalRecent,
+      double monthlyIncome,
+      bool addPartnershipReturnsPrior,
+      bool addPartnershipReturnsRecent,
+      bool moreThan5YearsOld, String verifyStatus, String selectedAddedBy
+      )async{
+    await firestore
+        .collection('users')
+        .doc(borrowerId)
+        .update({
+      'incomes': FieldValue.arrayUnion([
+        {
+          'type':'business',
+          'addedBy':selectedAddedBy,
+          'name': name,
+          'companyName': businessNameType,
+          'w2IncomeFromSelfEmploymentPrior': w2IncomeFromSelfEmploymentPrior,
+          'w2IncomeFromSelfEmploymentRecent': w2IncomeFromSelfEmploymentRecent,
+          'taxableIncomePrior': taxableIncomePrior,
+          'totalTaxPrior': totalTaxPrior,
+          'nonRecurringGainLossPrior': nonRecurringGainLossPrior,
+          'nonRecurringOtherIncomeLossPrior': nonRecurringOtherIncomeLossPrior,
+          'depreciationPrior': depreciationPrior,
+          'depletionPrior': depletionPrior,
+          'amortizationCasualtyLossOneTimeExpensePrior': amortizationCasualtyLossOneTimeExpensePrior,
+          'netOperatingLossAndSpecialDeductionsPrior': netOperatingLossAndSpecialDeductionsPrior,
+          'mortgagePayableInLessThanOneYearPrior': mortgagePayableInLessThanOneYearPrior,
+          'mealsAndEntertainmentPrior': mealsAndEntertainmentPrior,
+          'ownershipPercentagePrior': ownershipPercentagePrior,
+          'dividendsPaidToBorrowerPrior': dividendsPaidToBorrowerPrior,
+          'taxableIncomeRecent': taxableIncomeRecent,
+          'totalTaxRecent': totalTaxRecent,
+          'nonRecurringGainLossRecent': nonRecurringGainLossRecent,
+          'nonRecurringOtherIncomeLossRecent': nonRecurringOtherIncomeLossRecent,
+          'depreciationRecent': depreciationRecent,
+          'depletionRecent': depletionRecent,
+          'amortizationCasualtyLossOneTimeExpenseRecent': amortizationCasualtyLossOneTimeExpenseRecent,
+          'netOperatingLossAndSpecialDeductionsRecent': netOperatingLossAndSpecialDeductionsRecent,
+          'mortgagePayableInLessThanOneYearRecent': mortgagePayableInLessThanOneYearRecent,
+          'mealsAndEntertainmentRecent': mealsAndEntertainmentRecent,
+          'ownershipPercentageRecent': ownershipPercentageRecent,
+          'dividendsPaidToBorrowerRecent': dividendsPaidToBorrowerRecent,
+          'numberOfMonths': numberOfMonths,
+          'grossAnnualIncome': '${totalOfTaxReturnAndGrandTotalRecent + totalOfTaxReturnAndGrandTotalPrior}'.toString(),
+          'monthlyIncome': monthlyIncome.toString(),
+          'addPartnershipReturnsPrior': addPartnershipReturnsPrior.toString(),
+          'addPartnershipReturnsRecent': addPartnershipReturnsRecent.toString(),
+          'startDate': businessStartDate,
+          'currentlyActive': currentlyActive,
+          'status':currentlyActive == 'true' && greaterOrLessThen2Years ==  'true'?'Include':'Exclude',
+          'addedType': 'calculator',
+          'employerIncomeType': incomeType,
+          'timestamp':DateTime.now(),
+          'salaryCycle':'Monthly',
+          'baseYear':baseYear,
+          'w2Year':w2year,
+          'priorW2Year':priorW2Year,
+          'businessStartDateStamp':businessStartDateStamp,
+          'greaterOrLessThen2Years':greaterOrLessThen2Years,
+          'includeIt':greaterOrLessThen2Years ==  'true'?true:false,
+          'verifyStatus':verifyStatus,
+          'moreThan5YearsOld':moreThan5YearsOld.toString()
         }
       ])
     });

@@ -28,6 +28,7 @@ class UsersView extends GetView<UsersViewController>{
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Filter by LOA',style: TextStyle(fontWeight: FontWeight.bold),),
                           SizedBox(
@@ -43,7 +44,7 @@ class UsersView extends GetView<UsersViewController>{
                                 ),
                                 // Add more decoration..
                               ),
-                              value: 'All',
+                              value: controller.selectedLOA.value.isEmpty?'All':controller.selectedLOA.value,
                               hint: const Text(
                                 'Select LOA',
                                 style: TextStyle(fontSize: 12),
@@ -68,11 +69,15 @@ class UsersView extends GetView<UsersViewController>{
                               onChanged: (value) {
                                 //Do something when selected item is changed.
                                 // selectedLiabilityType = value.toString();
-                                controller.selectedLOA.value = value.toString();
+                                controller.selectedLeadStage.value = '';
+                                controller.selectedLOA.value = value.toString() == 'All'?'':value.toString();
+                                // print(controller.selectedLeadStage.value);
                               },
                               onSaved: (value) {
                                 // selectedLiabilityType = value.toString();
-                                controller.selectedLOA.value = value.toString();
+                                controller.selectedLeadStage.value = '';
+                                controller.selectedLOA.value = value.toString() == 'All'?'':value.toString();
+                                // print(controller.selectedLeadStage.value);
                               },
                               buttonStyleData: const ButtonStyleData(
                                 padding: EdgeInsets.only(right: 8),
@@ -95,11 +100,11 @@ class UsersView extends GetView<UsersViewController>{
                             ),
                             ),
                           ),
-
                         ],
                       ),
                       SizedBox(width: 8,),
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Filter by Borrower RE Agent',style: TextStyle(fontWeight: FontWeight.bold),),
                           SizedBox(
@@ -107,14 +112,10 @@ class UsersView extends GetView<UsersViewController>{
                             child: DropdownButtonFormField2<String>(
                               isExpanded: false,
                               decoration: InputDecoration(
-
-                                // Add Horizontal padding using menuItemStyleData.padding so it matches
-                                // the menu padding when button's width is not specified.
                                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                // Add more decoration..
                               ),
                               // value: 'All',
                               hint: const Text(
@@ -170,6 +171,7 @@ class UsersView extends GetView<UsersViewController>{
                       ),
                       SizedBox(width: 8,),
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Search by name / Phone Number',style: TextStyle(fontWeight: FontWeight.bold),),
                           Container(
@@ -234,10 +236,34 @@ class UsersView extends GetView<UsersViewController>{
                 )
               ],
             ).marginOnly(top: 16),
-
+            Align(alignment: Alignment.centerLeft,child: Text('Filter by Lead Stage',style: TextStyle(fontWeight: FontWeight.bold),).paddingAll(16)),
+            SizedBox(
+              width: Get.width * 1,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    leadStageContainer(controller,''),
+                    leadStageContainer(controller,'Open'),
+                    leadStageContainer(controller,'Warm'),
+                    leadStageContainer(controller,'Hot'),
+                    leadStageContainer(controller,'On Followup'),
+                    leadStageContainer(controller,'Negotiation'),
+                    leadStageContainer(controller,'Booked'),
+                    leadStageContainer(controller,'Cold'),
+                    leadStageContainer(controller,'Inactive'),
+                    leadStageContainer(controller,'Pre-Approved'),
+                    leadStageContainer(controller,'Pending'),
+                    leadStageContainer(controller,'Not Qualified'),
+                    leadStageContainer(controller,'Up Coming'),
+                    leadStageContainer(controller,'Not Qualified'),
+                  ],
+                ),
+              )
+            ).marginOnly(top: 0,left: 16,right: 16),
             Expanded(
               child:Obx(() => StreamBuilder<QuerySnapshot>(
-                stream: FirestoreService().getUsers(controller.selectedLOA.value).snapshots(),
+                stream: FirestoreService().getUsers(controller.selectedLOA.value,controller.selectedLeadStage.value).snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -427,3 +453,25 @@ class UsersView extends GetView<UsersViewController>{
   }
 
 }
+Widget leadStageContainer(UsersViewController controller, String value) => InkWell(
+  onTap: (){
+    if(value.isNotEmpty){
+      controller.selectedLOA.value = '';
+      controller.selectedLeadStage.value = value;
+    }else{
+      controller.selectedLOA.value = '';
+      controller.selectedLeadStage.value = '';
+    }
+
+      // print(controller.selectedLeadStage.value);
+      // print(controller.selectedLOA.value);
+
+  },
+  child: Container(
+    decoration: BoxDecoration(
+        border: Border.all(color: AppColors.primaryColor,width:1),
+        borderRadius: BorderRadius.circular(1000),
+    ),
+    child: Text(value.isNotEmpty?value:'All',style: TextStyle(fontWeight: FontWeight.bold),).paddingSymmetric(vertical: 2,horizontal: 12),
+  ).marginSymmetric(horizontal: 4),
+);

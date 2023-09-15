@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:zapa_mortgage_admin_web/controllers/user_detail_page_controller.dart';
+import 'package:zapa_mortgage_admin_web/pages/views/agent_conversation_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/borrower_discussion_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/co_borrower_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/fico_view.dart';
@@ -280,6 +281,34 @@ class UserDetailPage extends GetView<UserDetailPageController>{
                                             ),),
                                           ),
                                         ).marginOnly(top: 16),
+                                        InkWell(
+                                          onTap: (){
+                                            controller.setTabOption('conversationWithAgent');
+                                          },
+                                          child: MouseRegion(
+                                            onEnter: (_) => controller.setHoverOption('conversationWithAgent', true),
+                                            onExit: (_) => controller.setHoverOption('conversationWithAgent', false),
+                                            child:Obx(() => Container(
+                                              width: Get.width * 1,
+                                              height: 48,
+                                              decoration: BoxDecoration(
+                                                  color: controller.conversationWithAgentOptionHover || controller.selectedTab == 'conversationWithAgent'?AppColors.whiteColor:AppColors.transparentColor,
+                                                  border: Border.all(color: AppColors.whiteColor),
+                                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(10),bottomLeft: Radius.circular(10),
+                                                      topRight: Radius.circular(10),bottomRight: Radius.circular(10))
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  // Icon(Icons.settings,color: controller.fundsOptionHover || controller.selectedTab == 'Funds'?AppColors.primaryColor:AppColors.whiteColor,),
+                                                  // const SizedBox(width: 16,),
+                                                  Text('Conversation with Agent',style: TextStyle(color: controller.conversationWithAgentOptionHover || controller.selectedTab == 'conversationWithAgent'?AppColors.primaryColor:AppColors.whiteColor,
+                                                      fontWeight: FontWeight.bold,fontSize: 16),)
+                                                ],
+                                              ),
+                                            ),),
+                                          ),
+                                        ).marginOnly(top: 16),
                                       ],
                                     ).marginOnly(left: 18,right: 18).paddingSymmetric(vertical: 16),
                                   ),
@@ -301,7 +330,8 @@ class UserDetailPage extends GetView<UserDetailPageController>{
                       controller.selectedTab == 'Liability'?LiabilityView(borrowerId: controller.borrowerId,borrowerName: controller.borrowerName,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
                       controller.selectedTab == 'Funds'?FundsView(borrowerId: controller.borrowerId,borrowerName: controller.borrowerName,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
                       controller.selectedTab == 'coBorrowers'?CoBorrowerView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
-                      controller.selectedTab == 'BorrowerDiscussions'?BorrowerDiscussionView(borrowerId: controller.borrowerId,adminId: GetStorage().read(Constants.USER_ID),):SizedBox(),
+                      controller.selectedTab == 'BorrowerDiscussions'?BorrowerDiscussionView(borrowerId: controller.borrowerId,adminId: GetStorage().read(Constants.USER_ID),):
+                      controller.selectedTab == 'conversationWithAgent'?AgentConversationView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,):SizedBox(),
                     ))
                 ),
               ],

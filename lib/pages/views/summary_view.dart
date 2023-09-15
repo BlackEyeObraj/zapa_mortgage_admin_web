@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:zapa_mortgage_admin_web/controllers/borrower_discussion_view_controller.dart';
 import 'package:zapa_mortgage_admin_web/controllers/summary_view_controller.dart';
-import 'package:zapa_mortgage_admin_web/pages/views/borrower_discussion_view.dart';
 import 'package:zapa_mortgage_admin_web/res/app_colors.dart';
-import 'package:zapa_mortgage_admin_web/utils/routes/route_name.dart';
 
 import '../../services/firestore_service.dart';
+import '../../utils/constants.dart';
 import '../../utils/dialogs/nick_name_dialog.dart';
 import '../../utils/utils_mehtods.dart';
 
@@ -129,6 +128,95 @@ class SummaryView extends GetView<SummaryViewController>{
                                   ],
                                 )
                             ),
+                            Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Lead Stage',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,
+                                        color: AppColors.textColorWhite),),
+                                    StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                                      stream: FirestoreService().getUserDataNameStream(borrowerId),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasError) {
+                                          return Text('Error: ${snapshot.error}');
+                                        }
+
+                                        if (!snapshot.hasData) {
+                                          return Text('Loading ...');
+                                        }
+                                        var userData = snapshot.data!.data() as Map<String, dynamic>;
+                                        var leadStage = userData['leadStage'] as String?;
+                                        return Container(
+                                          height: 38,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(color: AppColors.whiteColor,width: 1),
+                                            borderRadius: BorderRadius.circular(1000)
+                                          ),
+                                          child: DropdownButtonFormField2<String>(
+                                            isExpanded: false,
+                                            decoration: InputDecoration(
+                                              contentPadding: EdgeInsets.only(bottom: 5),
+                                                border: InputBorder.none
+                                              // Add more decoration..
+                                            ),
+                                            value: leadStage == null ||leadStage.isEmpty  ? 'No Lead Selected':leadStage,
+                                            hint: const Text(
+                                              'Select Borrower ER Agent',
+                                              style: TextStyle(fontSize: 12,color: AppColors.whiteColor),
+                                            ),
+                                            items: Constants().leadStages
+                                                .map((item) => DropdownMenuItem<String>(
+                                              value: item,
+                                              child: Text(
+                                                item,
+                                                style: const TextStyle(
+                                                    fontSize: 14,
+                                                    color: AppColors.textColorWhite
+                                                ),
+                                              ),
+                                            )).toList(),
+                                            validator: (value) {
+                                              if (value == null) {
+                                                return 'No Lead Selected';
+                                              }
+                                              return null;
+                                            },
+                                            onChanged: (value) {
+                                              FirestoreService().setUserLeadStage(borrowerId, value.toString(),borrowerName,borrowerPhoneNumber);
+                                            },
+                                            onSaved: (value) {
+                                              },
+                                            buttonStyleData: ButtonStyleData(
+                                                padding: EdgeInsets.only(right: 8),
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(color: AppColors.transparentColor),
+                                                )
+                                            ),
+                                            iconStyleData: const IconStyleData(
+                                              icon: Icon(
+                                                Icons.arrow_drop_down,
+                                                color: Colors.white,
+                                              ),
+                                              iconSize: 24,
+                                            ),
+                                            dropdownStyleData: DropdownStyleData(
+                                              decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(15),
+                                                  color: AppColors.primaryColor
+                                              ),
+                                            ),
+                                            menuItemStyleData: const MenuItemStyleData(
+                                              padding: EdgeInsets.symmetric(horizontal: 16),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    )
+
+                                  ],
+                                )
+                            ),
+
                             Expanded(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -362,7 +450,8 @@ class SummaryView extends GetView<SummaryViewController>{
                                                     print(formattedDate);
                                                     print(formattedTime);
                                                     String value = '${formattedDate} / ${formattedTime}';
-                                                    FirestoreService().setNextEngagementDateTime(borrowerId, value,borrowerName,borrowerPhoneNumber);
+                                                    String date = '${pickedDate.day}/${pickedDate.month}/${pickedDate.year}';
+                                                    FirestoreService().setNextEngagementDateTime(borrowerId, value,borrowerName,borrowerPhoneNumber,date);
                                                   }
                                                 }else{
 

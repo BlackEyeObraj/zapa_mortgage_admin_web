@@ -50,6 +50,23 @@ class Constants{
     'Semi Monthly',
     'Monthly',
   ];
+
+  final List<String> leadStages = [
+    'No Lead Selected',
+    'Open',
+    'Warm',
+    'Hot',
+    'On Followup',
+    'Negotiation',
+    'Booked',
+    'Cold',
+    'Inactive',
+    'Pre-Approved',
+    'Pending',
+    'Not Qualified',
+    'Up Coming',
+  ];
+
   String note = 'If the additional income amount is added for just 1 w2 year then the amount will not be accepted/considered '
       'in total additional w2 income (YTD).';
 }

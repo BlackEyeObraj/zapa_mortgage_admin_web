@@ -32,14 +32,12 @@ class SummaryViewController extends GetxController{
   @override
   void onInit() async{
     print('test: ${borrowerId.value}');
-    // setSummaryValue(borrowerId.value);
     super.onInit();
   }
 
 
   setSummaryValue(String borrowerId, String borrowerName, String borrowerPhoneNumber){
     final box = GetStorage();
-    FirestoreService().historyDataAdd("${box.read(Constants.USER_NAME)} has viewed ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName}.");
     _subscription = FirestoreService()
         .calculateTotalVerifiedIncomesListener(borrowerId)
         .listen((value) {
@@ -69,6 +67,9 @@ class SummaryViewController extends GetxController{
         .calculateTotalIncludedFundsListener(borrowerId)
         .listen((value) {
       _totalFunds.value = value;
+    });
+    Future.delayed(const Duration(seconds: 1), ()async {
+      await FirestoreService().historyDataAdd("${box.read(Constants.USER_NAME)} has viewed ${borrowerName.isEmpty?borrowerPhoneNumber:borrowerName}.");
     });
   }
 

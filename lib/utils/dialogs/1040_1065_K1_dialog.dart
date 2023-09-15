@@ -696,19 +696,7 @@ class Form10401065K1IncomeDialog{
                                 fontColor: AppColors.primaryColor,
                                 textAlign: TextAlign.center),
                           ),
-                          Row(
-                            children: [
-                              Obx(() => Checkbox(
-                                  value: controller.moreThan5YearsOld,
-                                  onChanged: (value){
-                                    controller.setMoreThan5YearsOld(value!);
-                                  }
-                              ),),
-                              Expanded(
-                                  child: Text('My business Is more than 5 years old and I wish to use only 1 year , latest year income ${controller.w2Year}',
-                                    style: const TextStyle(fontSize: 12,fontWeight: FontWeight.bold),)),
-                            ],
-                          ).marginOnly(top: 8),
+
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -1408,6 +1396,19 @@ class Form10401065K1IncomeDialog{
                                 fontColor: AppColors.primaryColor,
                                 textAlign: TextAlign.center),
                           ),
+                          Row(
+                            children: [
+                              Obx(() => Checkbox(
+                                  value: controller.moreThan5YearsOld,
+                                  onChanged: (value){
+                                    controller.setMoreThan5YearsOld(value!);
+                                  }
+                              ),),
+                              Expanded(
+                                  child: Text('My business Is more than 5 years old and I wish to use only 1 year , latest year income ${controller.w2Year}',
+                                    style: const TextStyle(fontSize: 12,fontWeight: FontWeight.bold),)),
+                            ],
+                          ).marginOnly(top: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [

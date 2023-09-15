@@ -301,11 +301,11 @@ class Form1065CalculatorController extends GetxController{
     }else{
       if(_totalOfTaxReturnAndGrandTotalPrior.value == 0.0 && _totalOfTaxReturnAndGrandTotalRecent.value != 0.0){
         double total= _totalOfTaxReturnAndGrandTotalRecent.value;
-        _monthlyIncome.value =total/24;
+        _monthlyIncome.value =total/12;
         setCalculationMessage('6', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
       }else if(_totalOfTaxReturnAndGrandTotalPrior.value != 0.0 && _totalOfTaxReturnAndGrandTotalRecent.value != 0.0){
         double total= _totalOfTaxReturnAndGrandTotalRecent.value;
-        _monthlyIncome.value =total/24;
+        _monthlyIncome.value =total/12;
         setCalculationMessage('6', _totalOfTaxReturnAndGrandTotalPrior.value, _totalOfTaxReturnAndGrandTotalRecent.value, w2Year, priorW2Year,_monthlyIncome.value);
       }else{
         _monthlyIncome.value = 0.0;
@@ -336,7 +336,7 @@ class Form1065CalculatorController extends GetxController{
       'Trend is only set for one year $w2PriorYear only. So the monthly income is considered \$0.00 for not providing $w2Year income.';
     }else if(condition == '6'){
       _calculationMessage.value =
-      'if your business is more than 5 years old then trend is only set for one year $w2Year only. So the monthly income is considered as \n${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 24 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
+      'if your business is more than 5 years old then trend is only set for one year $w2Year only. So the monthly income is considered as \n${UtilMethods().formatNumberWithCommas(subTotalRecent)} / 12 = ${UtilMethods().formatNumberWithCommas(monthlyIncome)}';
     }else if(condition == '7'){
       _calculationMessage.value = '';
     }

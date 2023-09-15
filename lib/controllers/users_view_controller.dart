@@ -13,6 +13,7 @@ class UsersViewController extends GetxController{
   final RxString _phoneNumber = ''.obs;
   final RxString selectedLOA = ''.obs;
   final RxString selectedBREA = ''.obs;
+  final RxString selectedLeadStage = ''.obs;
   final RxList adminFilter = [].obs;
 
 

@@ -15,6 +15,7 @@ class DashBoardPageController extends GetxController{
   final RxBool _usersOptionHover = false.obs;
   final RxBool _remarksOptionHover = false.obs;
   final RxBool _historyOptionHover = false.obs;
+  final RxBool _engagementOptionHover = false.obs;
   final RxString _selectedTab = 'Borrowers'.obs;
   final RxString _userName = ''.obs;
 
@@ -22,6 +23,7 @@ class DashBoardPageController extends GetxController{
   bool get userOptionHover => _usersOptionHover.value;
   bool get remarksOptionHover => _remarksOptionHover.value;
   bool get historyOptionHover => _historyOptionHover.value;
+  bool get engagementOptionHover => _engagementOptionHover.value;
   String get selectedTab => _selectedTab.value;
   String get userName => _userName.value;
 
@@ -55,6 +57,8 @@ class DashBoardPageController extends GetxController{
       _remarksOptionHover.value = value;
     }else if(option == 'History'){
       _historyOptionHover.value = value;
+    }else if(option == "Today's Engagement"){
+      _engagementOptionHover.value = value;
     }
   }
   setTabOption(String option){

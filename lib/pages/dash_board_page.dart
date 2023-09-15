@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:zapa_mortgage_admin_web/controllers/dash_board_page_controller.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/history_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/remarks_view.dart';
+import 'package:zapa_mortgage_admin_web/pages/views/today_engagement.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/users_view.dart';
 import 'package:zapa_mortgage_admin_web/res/app_colors.dart';
 import 'package:zapa_mortgage_admin_web/res/app_images.dart';
@@ -138,6 +139,34 @@ class DashBoardPage extends GetView<DashBoardPageController> {
                                           ),),
                                         ),
                                       ).marginOnly(top: 16),
+                                      InkWell(
+                                        onTap: (){
+                                          controller.setTabOption("Today's Engagement");
+                                        },
+                                        child: MouseRegion(
+                                          onEnter: (_) => controller.setHoverOption("Today's Engagement", true),
+                                          onExit: (_) => controller.setHoverOption("Today's Engagement", false),
+                                          child:Obx(() => Container(
+                                            width: Get.width * 1,
+                                            height: 48,
+                                            decoration: BoxDecoration(
+                                                color: controller.engagementOptionHover || controller.selectedTab == "Today's Engagement"?AppColors.whiteColor:AppColors.transparentColor,
+                                                border: Border.all(color: AppColors.whiteColor),
+                                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10),bottomLeft: Radius.circular(10),
+                                                    topRight: Radius.circular(10),bottomRight: Radius.circular(10))
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.calendar_month,color: controller.engagementOptionHover || controller.selectedTab == "Today's Engagement"?AppColors.primaryColor:AppColors.whiteColor,),
+                                                const SizedBox(width: 16,),
+                                                Text("Today's Engagement",style: TextStyle(color: controller.engagementOptionHover || controller.selectedTab == "Today's Engagement"?AppColors.primaryColor:AppColors.whiteColor,
+                                                    fontWeight: FontWeight.bold,fontSize: 16),)
+                                              ],
+                                            ),
+                                          ),),
+                                        ),
+                                      ).marginOnly(top: 16),
 
                                     ],
                                   ).marginOnly(left: 18,right: 18),
@@ -214,6 +243,7 @@ class DashBoardPage extends GetView<DashBoardPageController> {
                             child: Obx(() => controller.selectedTab == 'Borrowers'? UsersView()
                                 :controller.selectedTab == 'Remarks & Notes'? RemarksView()
                                 :controller.selectedTab == 'History'? HistoryView()
+                                :controller.selectedTab == "Today's Engagement"? TodayEngagement()
                                 :SizedBox())
 
                         ),
