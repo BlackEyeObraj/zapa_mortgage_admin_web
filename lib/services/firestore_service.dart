@@ -268,26 +268,43 @@ class FirestoreService extends GetxService {
   getUsers(String selectedLOA, String selectedLeadStage){
     print('LOA: $selectedLOA');
     print('Lead Stage: $selectedLeadStage');
-    if(selectedLOA.isEmpty || selectedLOA == 'All' && selectedLeadStage.isEmpty){
+    if(selectedLOA.isEmpty && selectedLeadStage.isEmpty){
       Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users');
       print('object1');
       return users;
-    }else if(selectedLOA.isNotEmpty){
+    }else if(selectedLOA.isNotEmpty && selectedLeadStage.isEmpty){
       Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
           .where('assignedTo',isEqualTo: selectedLOA);
       print('object2');
       return users;
-    }else if(selectedLeadStage.isNotEmpty){
+    }else if(selectedLeadStage.isNotEmpty && selectedLOA.isEmpty){
       Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
           .where('leadStage',isEqualTo: selectedLeadStage);
       print('object3');
       return users;
+    }else{
+      Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+          .where('assignedTo',isEqualTo: selectedLOA).where('leadStage',isEqualTo: selectedLeadStage);
+      print('object4');
+      return users;
     }
+    // Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+    //     .where('assignedTo',isEqualTo: '').where('leadStage',isEqualTo: 'Negotiation');
+    // print('object3');
+    // return users;
+    // else if(selectedLOA.isNotEmpty){
+    //   Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+    //       .where('assignedTo',isEqualTo: selectedLOA);
+    //   print('object2');
+    //   return users;
+    // }else if(selectedLeadStage.isNotEmpty){
+    //   Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+    //       .where('leadStage',isEqualTo: selectedLeadStage);
+    //   print('object3');
+    //   return users;
+    // }
 
-      // Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
-      // .where('leadStage',isEqualTo: 'Negotiation');
-      // print('object3');
-      // return users;
+
   }
   getFilterAll(){
     Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users');

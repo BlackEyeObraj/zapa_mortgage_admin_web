@@ -69,14 +69,14 @@ class UsersView extends GetView<UsersViewController>{
                               onChanged: (value) {
                                 //Do something when selected item is changed.
                                 // selectedLiabilityType = value.toString();
-                                controller.selectedLeadStage.value = '';
                                 controller.selectedLOA.value = value.toString() == 'All'?'':value.toString();
+                                print(controller.selectedLOA.value);
                                 // print(controller.selectedLeadStage.value);
                               },
                               onSaved: (value) {
                                 // selectedLiabilityType = value.toString();
-                                controller.selectedLeadStage.value = '';
                                 controller.selectedLOA.value = value.toString() == 'All'?'':value.toString();
+                                print(controller.selectedLOA.value);
                                 // print(controller.selectedLeadStage.value);
                               },
                               buttonStyleData: const ButtonStyleData(
@@ -453,25 +453,22 @@ class UsersView extends GetView<UsersViewController>{
   }
 
 }
-Widget leadStageContainer(UsersViewController controller, String value) => InkWell(
-  onTap: (){
-    if(value.isNotEmpty){
-      controller.selectedLOA.value = '';
+Widget leadStageContainer(UsersViewController controller, String value) {
+  return InkWell(
+    onTap: () {
       controller.selectedLeadStage.value = value;
-    }else{
-      controller.selectedLOA.value = '';
-      controller.selectedLeadStage.value = '';
-    }
-
       // print(controller.selectedLeadStage.value);
       // print(controller.selectedLOA.value);
 
-  },
-  child: Container(
-    decoration: BoxDecoration(
-        border: Border.all(color: AppColors.primaryColor,width:1),
+    },
+    child: Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.primaryColor, width: 1),
         borderRadius: BorderRadius.circular(1000),
-    ),
-    child: Text(value.isNotEmpty?value:'All',style: TextStyle(fontWeight: FontWeight.bold),).paddingSymmetric(vertical: 2,horizontal: 12),
-  ).marginSymmetric(horizontal: 4),
-);
+      ),
+      child: Text(value.isNotEmpty ? value : 'All',
+        style: TextStyle(fontWeight: FontWeight.bold),).paddingSymmetric(
+          vertical: 2, horizontal: 12),
+    ).marginSymmetric(horizontal: 4),
+  );
+}
