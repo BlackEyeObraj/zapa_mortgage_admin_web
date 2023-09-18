@@ -265,47 +265,81 @@ class FirestoreService extends GetxService {
     });
     return items;
   }
-  getUsers(String selectedLOA, String selectedLeadStage){
+  Future<List<String>> fetchAgentFilter() async {
+    List<String> items = [];
+    items.add('All');
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('agent_test').get();
+    snapshot.docs.forEach((doc) {
+      String itemName = doc['name'];
+      items.add(itemName);
+    });
+    return items;
+  }
+
+    getUsers(String selectedLOA, String selectedLeadStage,String selectedBREA, String phoneNumbers){
     print('LOA: $selectedLOA');
     print('Lead Stage: $selectedLeadStage');
-    if(selectedLOA.isEmpty && selectedLeadStage.isEmpty){
+    print('Agent: $selectedBREA');
+    if(selectedLOA.isEmpty && selectedLeadStage.isEmpty && selectedBREA.isEmpty){
       Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users');
       print('object1');
       return users;
-    }else if(selectedLOA.isNotEmpty && selectedLeadStage.isEmpty){
+    }else if(selectedLOA.isNotEmpty && selectedLeadStage.isEmpty && selectedBREA.isEmpty){
       Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
           .where('assignedTo',isEqualTo: selectedLOA);
       print('object2');
       return users;
-    }else if(selectedLeadStage.isNotEmpty && selectedLOA.isEmpty){
+    }else if(selectedLeadStage.isNotEmpty && selectedLOA.isEmpty && selectedBREA.isEmpty){
       Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
           .where('leadStage',isEqualTo: selectedLeadStage);
       print('object3');
       return users;
-    }else{
+    }else if(selectedBREA.isNotEmpty && selectedLeadStage.isEmpty && selectedLOA.isEmpty){
+      Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+          .where('customerAgent',isEqualTo: selectedBREA);
+      print('object3');
+      return users;
+    }else if(selectedLOA.isNotEmpty && selectedBREA.isNotEmpty && selectedLeadStage.isEmpty){
+      Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+          .where('assignedTo',isEqualTo: selectedLOA).where('customerAgent',isEqualTo: selectedBREA);
+      print('object3');
+      return users;
+    }else if(selectedLOA.isNotEmpty && selectedBREA.isEmpty && selectedLeadStage.isNotEmpty){
       Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
           .where('assignedTo',isEqualTo: selectedLOA).where('leadStage',isEqualTo: selectedLeadStage);
+      print('object3');
+      return users;
+    }else if(selectedLOA.isEmpty && selectedBREA.isNotEmpty && selectedLeadStage.isNotEmpty){
+      Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+          .where('customerAgent',isEqualTo: selectedBREA).where('leadStage',isEqualTo: selectedLeadStage);
+      print('object3');
+      return users;
+    } else{
+      Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
+          .where('assignedTo',isEqualTo: selectedLOA)
+          .where('customerAgent',isEqualTo: selectedBREA)
+          .where('leadStage',isEqualTo: selectedLeadStage);
       print('object4');
       return users;
     }
-    // Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
-    //     .where('assignedTo',isEqualTo: '').where('leadStage',isEqualTo: 'Negotiation');
-    // print('object3');
-    // return users;
-    // else if(selectedLOA.isNotEmpty){
-    //   Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
-    //       .where('assignedTo',isEqualTo: selectedLOA);
-    //   print('object2');
-    //   return users;
-    // }else if(selectedLeadStage.isNotEmpty){
-    //   Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users')
-    //       .where('leadStage',isEqualTo: selectedLeadStage);
-    //   print('object3');
-    //   return users;
+
+    // Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users');
+    //
+    // if (phoneNumbers.isNotEmpty) {
+    //   // Create a list of possible phone numbers based on partial input
+    //   List<String> possiblePhoneNumbers = ['']; // Initialize with an empty string
+    //   for (int i = 0; i < phoneNumbers.length; i++) {
+    //     possiblePhoneNumbers.add(phoneNumbers.substring(0, i + 1));
+    //   }
+    //
+    //   // Use 'whereIn' to search for any of the possible phone numbers
+    //   users = users.where('phoneNumber', whereIn: possiblePhoneNumbers);
     // }
-
-
-  }
+    //
+    // // Add your other query conditions based on selectedLOA, selectedLeadStage, and selectedBREA here
+    //
+    // return users;
+    }
   getFilterAll(){
     Query<Map<String, dynamic>> users = FirebaseFirestore.instance.collection('users');
     print('object1');
@@ -1923,5 +1957,38 @@ class FirestoreService extends GetxService {
       'timestamp':DateTime.now(),
       'formattedDate':'${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}'
     });
+  }
+
+  shareMessageWithAgent(String message, String borrowerId, String borrowerName, String borrowerPhoneNumber, agentId, agentName)async{
+    String docId = firestore.collection('Chat').doc(agentId).id;
+
+    await firestore.collection('Chat').doc(agentId).set({
+      'agentId': agentId,
+      'agentName': agentName,
+      'adminId': box.read(Constants.USER_ID),
+      'borrowerName': borrowerName,
+      'borrowerPhoneNumber': borrowerPhoneNumber,
+      'id': docId, // Set the 'id' field with docId
+    }).then((value) async{
+      DocumentReference userDocRef =
+      firestore.collection('Chat').doc(agentId);
+
+      CollectionReference messagesCollectionRef =
+      userDocRef.collection('Messages');
+
+      DocumentReference docRef = messagesCollectionRef.doc();
+      await docRef.set({
+        'message': message,
+        'addedDateTime': DateTime.now(),
+        'addedBy': box.read(Constants.USER_NAME),
+        'borrowerId': borrowerId,
+        'to': agentId,
+        'from': 'admin',
+      });
+      await docRef.update({'id': docRef.id});
+    });
+    // await historyDataAdd("${box.read(Constants.USER_NAME)} has added a remark.");
+    Get.back();
+    Get.back();
   }
 }

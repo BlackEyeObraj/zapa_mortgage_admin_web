@@ -3,6 +3,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_network/image_network.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:zapa_mortgage_admin_web/controllers/users_view_controller.dart';
 import 'package:zapa_mortgage_admin_web/res/app_colors.dart';
 import 'package:zapa_mortgage_admin_web/services/firestore_service.dart';
@@ -16,7 +17,7 @@ class UsersView extends GetView<UsersViewController>{
   @override
   Widget build(BuildContext context) {
     return GetBuilder(
-      init: UsersViewController(),
+        init: UsersViewController(),
         builder: (controller){
         return Column(
           children: [
@@ -109,20 +110,23 @@ class UsersView extends GetView<UsersViewController>{
                           Text('Filter by Borrower RE Agent',style: TextStyle(fontWeight: FontWeight.bold),),
                           SizedBox(
                             width: 230,
-                            child: DropdownButtonFormField2<String>(
+                            child: Obx(() => DropdownButtonFormField2<String>(
                               isExpanded: false,
                               decoration: InputDecoration(
+                                // Add Horizontal padding using menuItemStyleData.padding so it matches
+                                // the menu padding when button's width is not specified.
                                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
+                                // Add more decoration..
                               ),
-                              // value: 'All',
+                              value: controller.selectedBREA.value.isEmpty?'All':controller.selectedBREA.value,
                               hint: const Text(
-                                'Select Borrower ER Agent',
+                                'Select Agent',
                                 style: TextStyle(fontSize: 12),
                               ),
-                              items: Constants().liabilityTypes
+                              items: controller.agentFilter
                                   .map((item) => DropdownMenuItem<String>(
                                 value: item,
                                 child: Text(
@@ -135,16 +139,22 @@ class UsersView extends GetView<UsersViewController>{
                               )).toList(),
                               validator: (value) {
                                 if (value == null) {
-                                  return 'Select Borrower ER Agent';
+                                  return 'Select Agent';
                                 }
                                 return null;
                               },
                               onChanged: (value) {
                                 //Do something when selected item is changed.
                                 // selectedLiabilityType = value.toString();
+                                controller.selectedBREA.value = value.toString() == 'All'?'':value.toString();
+                                print(controller.selectedBREA.value);
+                                // print(controller.selectedLeadStage.value);
                               },
                               onSaved: (value) {
                                 // selectedLiabilityType = value.toString();
+                                controller.selectedBREA.value = value.toString() == 'All'?'':value.toString();
+                                print(controller.selectedBREA.value);
+                                // print(controller.selectedLeadStage.value);
                               },
                               buttonStyleData: const ButtonStyleData(
                                 padding: EdgeInsets.only(right: 8),
@@ -164,6 +174,7 @@ class UsersView extends GetView<UsersViewController>{
                               menuItemStyleData: const MenuItemStyleData(
                                 padding: EdgeInsets.symmetric(horizontal: 16),
                               ),
+                            ),
                             ),
                           ),
 
@@ -241,29 +252,290 @@ class UsersView extends GetView<UsersViewController>{
               width: Get.width * 1,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: Row(
+                child: Obx(() => Row(
                   children: [
-                    leadStageContainer(controller,''),
-                    leadStageContainer(controller,'Open'),
-                    leadStageContainer(controller,'Warm'),
-                    leadStageContainer(controller,'Hot'),
-                    leadStageContainer(controller,'On Followup'),
-                    leadStageContainer(controller,'Negotiation'),
-                    leadStageContainer(controller,'Booked'),
-                    leadStageContainer(controller,'Cold'),
-                    leadStageContainer(controller,'Inactive'),
-                    leadStageContainer(controller,'Pre-Approved'),
-                    leadStageContainer(controller,'Pending'),
-                    leadStageContainer(controller,'Not Qualified'),
-                    leadStageContainer(controller,'Up Coming'),
-                    leadStageContainer(controller,'Not Qualified'),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = '';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                          color: controller.selectedLeadStage.value.isEmpty?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('All',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value.isEmpty?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Open';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Open'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Open',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Open'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Warm';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Warm'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Warm',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Warm'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Hot';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Hot'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Hot',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Hot'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'On Followup';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'On Followup'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('On Followup',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'On Followup'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Negotiation';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Negotiation'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Negotiation',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Negotiation'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Booked';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Booked'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Booked',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Booked'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Cold';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Cold'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Cold',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Cold'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Inactive';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Inactive'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Inactive',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Inactive'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Pre-Approved';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Pre-Approved'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Pre-Approved',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Pre-Approved'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Pending';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Pending'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Pending',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Pending'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Not Qualified';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Not Qualified'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Not Qualified',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Not Qualified'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.selectedLeadStage.value = 'Up Coming';
+                        // print(controller.selectedLeadStage.value);
+                        // print(controller.selectedLOA.value);
+
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor, width: 1),
+                          borderRadius: BorderRadius.circular(1000),
+                            color: controller.selectedLeadStage.value == 'Up Coming'?AppColors.primaryColor:AppColors.transparentColor
+                        ),
+                        child: Text('Up Coming',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: controller.selectedLeadStage.value == 'Up Coming'?AppColors.whiteColor:AppColors.primaryColor
+                          ),).paddingSymmetric(
+                            vertical: 2, horizontal: 12),
+                      ).marginSymmetric(horizontal: 4),
+                    ),
+                      // leadStageContainer(controller,''),
+                    // leadStageContainer(controller,'Open'),
+                    // leadStageContainer(controller,'Warm'),
+                    // leadStageContainer(controller,'Hot'),
+                    // leadStageContainer(controller,'On Followup'),
+                    // leadStageContainer(controller,'Negotiation'),
+                    // leadStageContainer(controller,'Booked'),
+                    // leadStageContainer(controller,'Cold'),
+                    // leadStageContainer(controller,'Inactive'),
+                    // leadStageContainer(controller,'Pre-Approved'),
+                    // leadStageContainer(controller,'Pending'),
+                    // leadStageContainer(controller,'Not Qualified'),
+                    // leadStageContainer(controller,'Up Coming'),
+                    // leadStageContainer(controller,'Not Qualified'),
                   ],
-                ),
+                )),
               )
             ).marginOnly(top: 0,left: 16,right: 16),
             Expanded(
               child:Obx(() => StreamBuilder<QuerySnapshot>(
-                stream: FirestoreService().getUsers(controller.selectedLOA.value,controller.selectedLeadStage.value).snapshots(),
+                stream: FirestoreService().getUsers(controller.selectedLOA.value,controller.selectedLeadStage.value,controller.selectedBREA.value,controller.phoneNumbers.value).snapshots(),
+
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -306,18 +578,18 @@ class UsersView extends GetView<UsersViewController>{
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(10000),
-                                    child: data['userImage'] != ''?
-                                    ImageNetwork(image: data['userImage'], height: 60, width: 60):
-                                    Container(
-                                        height: 60,
-                                        width: 60,
-                                        decoration: BoxDecoration(
-                                            color: AppColors.primaryColor,
-                                            shape: BoxShape.circle,
-                                            border: Border.all(color: AppColors.primaryColor)
-                                        ),
-                                        child: Icon(Icons.person,color: AppColors.whiteColor,size: 28,).paddingAll(6)
-                                    ),
+                                  child: data['userImage'] != ''?
+                                  ImageNetwork(image: data['userImage'], height: 60, width: 60):
+                                  Container(
+                                      height: 60,
+                                      width: 60,
+                                      decoration: BoxDecoration(
+                                          color: AppColors.primaryColor,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: AppColors.primaryColor)
+                                      ),
+                                      child: Icon(Icons.person,color: AppColors.whiteColor,size: 28,).paddingAll(6)
+                                  ),
                                 ),
                                 // CircleAvatar(
                                 //     radius: Get.height * .04,
@@ -360,8 +632,8 @@ class UsersView extends GetView<UsersViewController>{
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
-                                              color: AppColors.secondaryColor,
-                                              borderRadius: BorderRadius.circular(1000)
+                                                color: AppColors.secondaryColor,
+                                                borderRadius: BorderRadius.circular(1000)
                                             ),
                                             child: Row(
                                               children: [
@@ -444,7 +716,8 @@ class UsersView extends GetView<UsersViewController>{
                     },
                   ).paddingSymmetric(horizontal: 16,vertical: 16);
                 },
-              ),)
+              )),
+
             ),
           ],
         );

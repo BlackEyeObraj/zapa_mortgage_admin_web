@@ -11,8 +11,10 @@ import '../../utils/utils_mehtods.dart';
 class BorrowerDiscussionView extends GetView<BorrowerDiscussionViewController>{
   final String borrowerId;
   final String adminId;
+  final String borrowerName;
+  final String borrowerPhoneNumber;
 
-  BorrowerDiscussionView({required this.borrowerId,required this.adminId});
+  BorrowerDiscussionView({required this.borrowerId,required this.adminId,required this.borrowerName,required this.borrowerPhoneNumber});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +48,7 @@ class BorrowerDiscussionView extends GetView<BorrowerDiscussionViewController>{
                         child: InkWell(
                           onTap: (){
                             // FundDialog().addFundDialog(borrowerId);
-                            BorrowerDiscussionMessageDialog().addMessageDialog(borrowerId);
+                            BorrowerDiscussionMessageDialog().addMessageDialog(borrowerId,borrowerName,borrowerPhoneNumber);
 
                           },
                           child: Container(

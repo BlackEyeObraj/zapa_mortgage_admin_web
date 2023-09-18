@@ -7,7 +7,7 @@ import 'package:zapa_mortgage_admin_web/utils/snack_bar.dart';
 
 class BorrowerDiscussionMessageDialog {
 
-  addMessageDialog(String borrowerId) {
+  addMessageDialog(String borrowerId, String borrowerName, String borrowerPhoneNumber) {
     final messageTextController = TextEditingController();
     return Get.dialog(
       Padding(
@@ -88,7 +88,7 @@ class BorrowerDiscussionMessageDialog {
                                 }else if (messageTextController.text.trim().isEmpty) {
                                   SnackBarApp().errorSnack('Form Error', 'Message field must not be empty.');
                                 }else {
-                                  ShareSendDialog().shareAndSend();
+                                  ShareSendDialog().shareAndSend(messageTextController.text,borrowerId,borrowerName,borrowerPhoneNumber);
                                 }
                               }, child: Text('Share with Agent & Add Message',
                               style: TextStyle(fontWeight: FontWeight.bold))),
