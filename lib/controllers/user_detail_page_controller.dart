@@ -25,6 +25,7 @@ class UserDetailPageController extends GetxController{
   final RxBool _coBorrowersOptionHove = false.obs;
   final RxBool _borrowerDiscussionsOptionHover = false.obs;
   final RxBool _conversationWithAgentOptionHover = false.obs;
+  final RxBool _conversationWithBorrowerOptionHover = false.obs;
 
 
   String get borrowerId => _borrowerId.value;
@@ -40,6 +41,7 @@ class UserDetailPageController extends GetxController{
   bool get coBorrowersOptionHove => _coBorrowersOptionHove.value;
   bool get borrowerDiscussionsOptionHover => _borrowerDiscussionsOptionHover.value;
   bool get conversationWithAgentOptionHover => _conversationWithAgentOptionHover.value;
+  bool get conversationWithBorrowerOptionHover => _conversationWithBorrowerOptionHover.value;
 
   @override
   void onInit() async{
@@ -89,6 +91,8 @@ class UserDetailPageController extends GetxController{
       _borrowerDiscussionsOptionHover.value = value;
     }else if(option == 'conversationWithAgent'){
       _conversationWithAgentOptionHover.value = value;
+    }else if(option == 'conversationWithBorrower'){
+      _conversationWithBorrowerOptionHover.value = value;
     }
   }
   @override

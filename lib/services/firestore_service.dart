@@ -385,32 +385,7 @@ class FirestoreService extends GetxService {
   //   await docRef.update({'id': docId});
   //   Get.back();
   // }
-  Future<void> addMessage(String borrowerId, String message) async {
-    try {
-      DocumentReference userDocRef =
-      firestore.collection('users').doc(borrowerId);
 
-      CollectionReference messagesCollectionRef =
-      userDocRef.collection('Messages');
-
-      DocumentReference docRef = messagesCollectionRef.doc();
-
-      await docRef.set({
-        'message': message,
-        'addedDateTime': DateTime.now(),
-        'addedBy': box.read(Constants.USER_NAME),
-        'adminId': box.read(Constants.USER_ID),
-        'borrowerId': borrowerId,
-      });
-
-      await docRef.update({'id': docRef.id});
-
-      Get.back();
-    } catch (error) {
-      print('Error adding message: $error');
-      // Handle the error here
-    }
-  }
 
   void editRemarksAndNotes(String documentId, Map<String, dynamic> updatedData) async {
     CollectionReference collectionReference = FirebaseFirestore.instance.collection('RemarksAndNotes');
@@ -516,7 +491,7 @@ class FirestoreService extends GetxService {
     return remarksAndNotes.where('formattedDate',isEqualTo: pickedDate);
   }
   getMessages(String borrowerId){
-    CollectionReference remarksAndNotes = FirebaseFirestore.instance.collection('users').doc(borrowerId).collection('Messages');
+    CollectionReference remarksAndNotes = FirebaseFirestore.instance.collection('users').doc(borrowerId).collection('AdminDiscussions');
     return remarksAndNotes.orderBy('addedDateTime', descending: true);
   }
   void addEditUserNickName(String userId, Map<String, dynamic> updatedData, String nickName, String userName, String phoneNumber) async {
@@ -1958,37 +1933,301 @@ class FirestoreService extends GetxService {
       'formattedDate':'${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}'
     });
   }
-
-  shareMessageWithAgent(String message, String borrowerId, String borrowerName, String borrowerPhoneNumber, agentId, agentName)async{
-    String docId = firestore.collection('Chat').doc(agentId).id;
-
-    await firestore.collection('Chat').doc(agentId).set({
-      'agentId': agentId,
-      'agentName': agentName,
-      'adminId': box.read(Constants.USER_ID),
-      'borrowerName': borrowerName,
-      'borrowerPhoneNumber': borrowerPhoneNumber,
-      'id': docId, // Set the 'id' field with docId
-    }).then((value) async{
+  Future<void> addMessage(String borrowerId, String message) async {
+    try {
       DocumentReference userDocRef =
-      firestore.collection('Chat').doc(agentId);
+      firestore.collection('users').doc(borrowerId);
 
       CollectionReference messagesCollectionRef =
-      userDocRef.collection('Messages');
+      userDocRef.collection('AdminDiscussions');
+
+      DocumentReference docRef = messagesCollectionRef.doc();
+
+      await docRef.set({
+        'message': message,
+        'addedDateTime': DateTime.now(),
+        'addedBy': box.read(Constants.USER_NAME),
+        'adminId': box.read(Constants.USER_ID),
+        'borrowerId': borrowerId,
+        'sharedWith':[],
+      });
+
+      await docRef.update({'id': docRef.id});
+
+      Get.back();
+    } catch (error) {
+      print('Error adding message: $error');
+      // Handle the error here
+    }
+  }
+  shareMessageWithAgent(String message, String borrowerId, String borrowerName, String borrowerPhoneNumber, agentId, agentName)async{
+    final sharedWith = [];
+    sharedWith.add(agentName);
+    try {
+      DocumentReference userDocRef =
+      firestore.collection('users').doc(borrowerId);
+      CollectionReference messagesCollectionRef =
+      userDocRef.collection('AdminDiscussions');
+      DocumentReference docRef = messagesCollectionRef.doc();
+      await docRef.set({
+        'message': message,
+        'addedDateTime': DateTime.now(),
+        'addedBy': box.read(Constants.USER_NAME),
+        'adminId': box.read(Constants.USER_ID),
+        'sharedWith':sharedWith,
+        'borrowerId': borrowerId,
+      }).then((value)async {
+        DocumentReference userDocRef =
+        firestore.collection('users').doc(borrowerId);
+        CollectionReference messagesCollectionRef =
+        userDocRef.collection('AgentChat');
+        DocumentReference docRef = messagesCollectionRef.doc(agentId);
+        docRef.set({
+            'agentId': agentId,
+            'agentName': agentName,
+            'borrowerName': borrowerName,
+            'borrowerId': borrowerId,
+            'chatWith': 'agent',
+            'borrowerPhoneNumber': borrowerPhoneNumber,
+            'lastMessage':DateTime.now()
+        })
+
+        // await firestore.collection('Chat').doc('$agentId = $borrowerId').set({
+        //   'agentId': agentId,
+        //   'agentName': agentName,
+        //   'borrowerName': borrowerName,
+        //   'borrowerId': borrowerId,
+        //   'chatWith': 'agent',
+        //   'borrowerPhoneNumber': borrowerPhoneNumber,
+        //   'id': docId,
+        //   'lastMessage':DateTime.now()
+        // })
+        // await firestore.collection('users').doc(borrowerId).collection('Chats').doc(agentId).set({
+        //   'agentId': agentId,
+        //   'agentName': agentName,
+        //   'borrowerName': borrowerName,
+        //   'borrowerId': borrowerId,
+        //   'chatWith': 'agent',
+        //   'borrowerPhoneNumber': borrowerPhoneNumber,
+        //   'lastMessage':DateTime.now()
+        // })
+            .then((value) async{
+          DocumentReference userDocRef =
+          firestore.collection('users').doc(borrowerId);
+
+          CollectionReference messagesCollectionRef = userDocRef.collection('AgentChat');
+
+          DocumentReference docRef = messagesCollectionRef.doc(agentId).collection('Messages').doc();
+          await docRef.set({
+            'message': message,
+            'addedDateTime': DateTime.now(),
+            'addedBy': box.read(Constants.USER_NAME),
+            'borrowerId': borrowerId,
+            'to': agentId,
+            'from': 'admin',
+          });
+          await docRef.update({'id': docRef.id});
+        });
+      });
+      // await docRef.update({'id': docRef.id});
+
+    } catch (error) {
+      print('Error adding message: $error');
+      // Handle the error here
+    }
+    // await historyDataAdd("${box.read(Constants.USER_NAME)} has added a remark.");
+    Get.back();
+    Get.back();
+  }
+  shareMessageWithBorrower(String message, String borrowerId, String borrowerName, String borrowerPhoneNumber)async{
+    final sharedWith = [];
+
+    sharedWith.add(borrowerName.isEmpty?borrowerPhoneNumber:borrowerName);
+    try {
+      DocumentReference userDocRef =
+      firestore.collection('users').doc(borrowerId);
+
+      CollectionReference messagesCollectionRef =
+      userDocRef.collection('AdminDiscussions');
 
       DocumentReference docRef = messagesCollectionRef.doc();
       await docRef.set({
         'message': message,
         'addedDateTime': DateTime.now(),
         'addedBy': box.read(Constants.USER_NAME),
+        'adminId': box.read(Constants.USER_ID),
+        'sharedWith':sharedWith,
         'borrowerId': borrowerId,
-        'to': agentId,
-        'from': 'admin',
+      }).
+        //   .then((value)async {
+        // await firestore.collection('users').doc(borrowerId).collection('BorrowerChat').set({
+        //   'borrowerName': borrowerName,
+        //   'chatWith': 'borrower',
+        //   'borrowerPhoneNumber': borrowerPhoneNumber,
+        //   'lastMessage':DateTime.now()
+        // }).
+        then((value) async{
+          DocumentReference userDocRef =
+          firestore.collection('users').doc(borrowerId);
+
+          CollectionReference messagesCollectionRef =
+          userDocRef.collection('BorrowerChat');
+
+          DocumentReference docRef = messagesCollectionRef.doc();
+          await docRef.set({
+            'message': message,
+            'addedDateTime': DateTime.now(),
+            'addedBy': box.read(Constants.USER_NAME),
+            'to': borrowerId,
+            'from': 'admin',
+          });
+          await docRef.update({'id': docRef.id});
+        });
+
+      // });
+
+      // await docRef.update({'id': docRef.id});
+
+    } catch (error) {
+      print('Error adding message: $error');
+      // Handle the error here
+    }
+    // await historyDataAdd("${box.read(Constants.USER_NAME)} has added a remark.");
+    Get.back();
+  }
+  shareMessageWithBorrowerAndAgent(String message, String borrowerId, String borrowerName, String borrowerPhoneNumber, agentId, agentName)async{
+    final sharedWith = [];
+    sharedWith.add(agentName);
+    sharedWith.add(borrowerName);
+    try {
+      DocumentReference userDocRef =
+      firestore.collection('users').doc(borrowerId);
+
+      CollectionReference messagesCollectionRef =
+      userDocRef.collection('AdminDiscussions');
+
+      DocumentReference docRef = messagesCollectionRef.doc();
+      await docRef.set({
+        'message': message,
+        'addedDateTime': DateTime.now(),
+        'addedBy': box.read(Constants.USER_NAME),
+        'adminId': box.read(Constants.USER_ID),
+        'sharedWith':sharedWith,
+        'borrowerId': borrowerId,
+      }).then((value)async {
+        DocumentReference userDocRef =
+        firestore.collection('users').doc(borrowerId);
+        CollectionReference messagesCollectionRef =
+        userDocRef.collection('AgentChat');
+        DocumentReference docRef = messagesCollectionRef.doc(agentId);
+        docRef.set({
+          'agentId': agentId,
+          'agentName': agentName,
+          'borrowerName': borrowerName,
+          'borrowerId': borrowerId,
+          'chatWith': 'agent',
+          'borrowerPhoneNumber': borrowerPhoneNumber,
+          'lastMessage':DateTime.now()
+        })
+
+        // await firestore.collection('Chat').doc('$agentId = $borrowerId').set({
+        //   'agentId': agentId,
+        //   'agentName': agentName,
+        //   'borrowerName': borrowerName,
+        //   'borrowerId': borrowerId,
+        //   'chatWith': 'agent',
+        //   'borrowerPhoneNumber': borrowerPhoneNumber,
+        //   'id': docId,
+        //   'lastMessage':DateTime.now()
+        // })
+        // await firestore.collection('users').doc(borrowerId).collection('Chats').doc(agentId).set({
+        //   'agentId': agentId,
+        //   'agentName': agentName,
+        //   'borrowerName': borrowerName,
+        //   'borrowerId': borrowerId,
+        //   'chatWith': 'agent',
+        //   'borrowerPhoneNumber': borrowerPhoneNumber,
+        //   'lastMessage':DateTime.now()
+        // })
+            .then((value) async{
+          DocumentReference userDocRef =
+          firestore.collection('users').doc(borrowerId);
+
+          CollectionReference messagesCollectionRef = userDocRef.collection('AgentChat');
+
+          DocumentReference docRef = messagesCollectionRef.doc(agentId).collection('Messages').doc();
+          await docRef.set({
+            'message': message,
+            'addedDateTime': DateTime.now(),
+            'addedBy': box.read(Constants.USER_NAME),
+            'borrowerId': borrowerId,
+            'to': agentId,
+            'from': 'admin',
+          });
+          await docRef.update({'id': docRef.id});
+        });
+
+      }).then((value) async{
+        DocumentReference userDocRef =
+        firestore.collection('users').doc(borrowerId);
+
+        CollectionReference messagesCollectionRef =
+        userDocRef.collection('BorrowerChat');
+
+        DocumentReference docRef = messagesCollectionRef.doc();
+        await docRef.set({
+          'message': message,
+          'addedDateTime': DateTime.now(),
+          'addedBy': box.read(Constants.USER_NAME),
+          'to': borrowerId,
+          'from': 'admin',
+        });
+        await docRef.update({'id': docRef.id});
       });
+
       await docRef.update({'id': docRef.id});
-    });
+
+    } catch (error) {
+      print('Error adding message: $error');
+      // Handle the error here
+    }
     // await historyDataAdd("${box.read(Constants.USER_NAME)} has added a remark.");
     Get.back();
     Get.back();
+  }
+
+
+  sendMessage(String agentId,String message)async{
+    DocumentReference userDocRef =
+    firestore.collection('Chat').doc(agentId);
+
+    CollectionReference messagesCollectionRef =
+    userDocRef.collection('Messages');
+
+    DocumentReference docRef = messagesCollectionRef.doc();
+    await docRef.set({
+      'message': message,
+      'addedDateTime': DateTime.now(),
+      'addedBy': box.read(Constants.USER_NAME),
+      'to': agentId,
+      'from': 'admin',
+    });
+    await docRef.update({'id': docRef.id});
+  }
+  sendMessageBorrower(String borrowerId,String message)async{
+    DocumentReference userDocRef =
+    firestore.collection('users').doc(borrowerId);
+    CollectionReference messagesCollectionRef =
+    userDocRef.collection('BorrowerChat');
+
+    DocumentReference docRef = messagesCollectionRef.doc();
+    await docRef.set({
+      'message': message,
+      'addedDateTime': DateTime.now(),
+      'addedBy': box.read(Constants.USER_NAME),
+      'to': borrowerId,
+      'from': 'admin',
+    });
+    await docRef.update({'id': docRef.id});
   }
 }

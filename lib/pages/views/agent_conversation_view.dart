@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_network/image_network.dart';
 import 'package:zapa_mortgage_admin_web/controllers/agent_conversation_view_controller.dart';
+import 'package:zapa_mortgage_admin_web/utils/dialogs/chat_dialog.dart';
 
 import '../../res/app_colors.dart';
 
 class AgentConversationView extends GetView<AgentConversationViewController>{
   final String borrowerId;
   final String borrowerPhoneNumber;
-  AgentConversationView({required this.borrowerId, required this.borrowerPhoneNumber});
+  final String borrowerName;
+  AgentConversationView({required this.borrowerId, required this.borrowerPhoneNumber, required this.borrowerName});
   @override
   Widget build(BuildContext context) {
     return GetBuilder(
@@ -25,20 +27,45 @@ class AgentConversationView extends GetView<AgentConversationViewController>{
                     color: AppColors.primaryColor,
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20),bottomRight: Radius.circular(20))
                 ),
-                child: Center(
-                  child: Text(
-                    'Conversation with Agent',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 28,
-                        color: AppColors.textColorWhite
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Text(
+                        'Conversation with Agent',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 28,
+                            color: AppColors.textColorWhite
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Text('Borrower Name: ',style: TextStyle(color: AppColors.textColorWhite,fontWeight: FontWeight.bold),),
+                              Text(borrowerName.isNotEmpty?borrowerName:'N/A',style: TextStyle(color: AppColors.textColorWhite,fontWeight: FontWeight.normal),),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text('Borrower PhoneNumber: ',style: TextStyle(color: AppColors.textColorWhite,fontWeight: FontWeight.bold),),
+                              Text(borrowerPhoneNumber.isNotEmpty?borrowerPhoneNumber:'N/A',style: TextStyle(color: AppColors.textColorWhite,fontWeight: FontWeight.normal),),
+                            ],
+                          ),
+                        ],
+                      ).marginOnly(left: 16),
+                    )
+                  ],
+                )
+
               ),
               Expanded(
                   child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance.collection('Chat').snapshots(),
+                    stream: FirebaseFirestore.instance.collection('users').doc(borrowerId).collection('AgentChat').snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
@@ -79,21 +106,21 @@ class AgentConversationView extends GetView<AgentConversationViewController>{
                                 children: [
                                   Row(
                                     children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(10000),
-                                        child: data['borrowerImage'] != ''?
-                                        ImageNetwork(image: data['borrowerImage'], height: 60, width: 60):
-                                        Container(
-                                            height: 60,
-                                            width: 60,
-                                            decoration: BoxDecoration(
-                                                color: AppColors.primaryColor,
-                                                shape: BoxShape.circle,
-                                                border: Border.all(color: AppColors.primaryColor)
-                                            ),
-                                            child: Icon(Icons.person,color: AppColors.whiteColor,size: 28,).paddingAll(6)
-                                        ),
-                                      ),
+                                      // ClipRRect(
+                                      //   borderRadius: BorderRadius.circular(10000),
+                                      //   child: data['borrowerImage'] != ''?
+                                      //   ImageNetwork(image: data['borrowerImage'], height: 60, width: 60):
+                                      //   Container(
+                                      //       height: 60,
+                                      //       width: 60,
+                                      //       decoration: BoxDecoration(
+                                      //           color: AppColors.primaryColor,
+                                      //           shape: BoxShape.circle,
+                                      //           border: Border.all(color: AppColors.primaryColor)
+                                      //       ),
+                                      //       child: Icon(Icons.person,color: AppColors.whiteColor,size: 28,).paddingAll(6)
+                                      //   ),
+                                      // ),
                                       // CircleAvatar(
                                       //     radius: Get.height * .04,
                                       //     backgroundColor: AppColors.primaryColor,
@@ -107,46 +134,35 @@ class AgentConversationView extends GetView<AgentConversationViewController>{
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
+                                          data['chatWith'] == 'agent'?
                                           RichText(
                                             text: TextSpan(
-                                              text: 'Chat Room of: ',
+                                              text: 'Chat Room of Agent: ',
                                               style: TextStyle(fontWeight: FontWeight.bold),
                                               children: <TextSpan>[
                                                 TextSpan(text: data['agentName'] != ''?data['agentName']:'N/A', style: TextStyle(fontWeight: FontWeight.normal)),
                                               ],
                                             ),
-                                          ),
-                                          SizedBox(height: 8,),
-                                          RichText(
+                                          ):RichText(
                                             text: TextSpan(
-                                              text: 'Borrower Name: ',
+                                              text: 'Chat Room of: ',
                                               style: TextStyle(fontWeight: FontWeight.bold),
                                               children: <TextSpan>[
-                                                TextSpan(text: data['borrowerName'] != ''?data['borrowerName']:'N/A', style: TextStyle(fontWeight: FontWeight.normal)),
+                                                TextSpan(text: data['borrowerName'] != ''?data['borrowerName']:data['borrowerPhoneNumber'], style: TextStyle(fontWeight: FontWeight.normal)),
                                               ],
                                             ),
                                           ),
-                                          SizedBox(height: 8,),
-                                          RichText(
-                                            text: TextSpan(
-                                              text: 'Borrower Phone Number: ',
-                                              style: TextStyle(fontWeight: FontWeight.bold),
-                                              children: <TextSpan>[
-                                                TextSpan(text: data['borrowerPhoneNumber'], style: TextStyle(fontWeight: FontWeight.normal)),
-                                              ],
-                                            ),
-                                          ),
+
                                         ],
                                       ).paddingSymmetric(vertical: 8)
                                     ],
                                   ),
                                   SizedBox(
-                                    height: .1,
                                     child: ElevatedButton(onPressed: (){
-
+                                      ChatDialog().chatDialog(data['agentId'],borrowerId,data['agentName']);
                                     }, child: Row(
                                       children: [
-                                        Text('Chat '),
+                                        Text('Enter Chat '),
                                         Icon(Icons.message,size: 16,),
                                       ],
                                     )),

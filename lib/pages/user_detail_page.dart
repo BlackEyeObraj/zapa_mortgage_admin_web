@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:zapa_mortgage_admin_web/controllers/user_detail_page_controller.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/agent_conversation_view.dart';
+import 'package:zapa_mortgage_admin_web/pages/views/borrower_conversation_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/borrower_discussion_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/co_borrower_view.dart';
 import 'package:zapa_mortgage_admin_web/pages/views/fico_view.dart';
@@ -302,7 +303,35 @@ class UserDetailPage extends GetView<UserDetailPageController>{
                                                 children: [
                                                   // Icon(Icons.settings,color: controller.fundsOptionHover || controller.selectedTab == 'Funds'?AppColors.primaryColor:AppColors.whiteColor,),
                                                   // const SizedBox(width: 16,),
-                                                  Text('Conversation with Agent',style: TextStyle(color: controller.conversationWithAgentOptionHover || controller.selectedTab == 'conversationWithAgent'?AppColors.primaryColor:AppColors.whiteColor,
+                                                  Text('Borrowers Agent Chat',style: TextStyle(color: controller.conversationWithAgentOptionHover || controller.selectedTab == 'conversationWithAgent'?AppColors.primaryColor:AppColors.whiteColor,
+                                                      fontWeight: FontWeight.bold,fontSize: 16),)
+                                                ],
+                                              ),
+                                            ),),
+                                          ),
+                                        ).marginOnly(top: 16),
+                                        InkWell(
+                                          onTap: (){
+                                            controller.setTabOption('conversationWithBorrower');
+                                          },
+                                          child: MouseRegion(
+                                            onEnter: (_) => controller.setHoverOption('conversationWithBorrower', true),
+                                            onExit: (_) => controller.setHoverOption('conversationWithBorrower', false),
+                                            child:Obx(() => Container(
+                                              width: Get.width * 1,
+                                              height: 48,
+                                              decoration: BoxDecoration(
+                                                  color: controller.conversationWithBorrowerOptionHover || controller.selectedTab == 'conversationWithBorrower'?AppColors.whiteColor:AppColors.transparentColor,
+                                                  border: Border.all(color: AppColors.whiteColor),
+                                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(10),bottomLeft: Radius.circular(10),
+                                                      topRight: Radius.circular(10),bottomRight: Radius.circular(10))
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  // Icon(Icons.settings,color: controller.fundsOptionHover || controller.selectedTab == 'Funds'?AppColors.primaryColor:AppColors.whiteColor,),
+                                                  // const SizedBox(width: 16,),
+                                                  Text('Borrower Chat',style: TextStyle(color: controller.conversationWithBorrowerOptionHover || controller.selectedTab == 'conversationWithBorrower'?AppColors.primaryColor:AppColors.whiteColor,
                                                       fontWeight: FontWeight.bold,fontSize: 16),)
                                                 ],
                                               ),
@@ -331,7 +360,9 @@ class UserDetailPage extends GetView<UserDetailPageController>{
                       controller.selectedTab == 'Funds'?FundsView(borrowerId: controller.borrowerId,borrowerName: controller.borrowerName,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
                       controller.selectedTab == 'coBorrowers'?CoBorrowerView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
                       controller.selectedTab == 'BorrowerDiscussions'?BorrowerDiscussionView(borrowerId: controller.borrowerId,adminId: GetStorage().read(Constants.USER_ID),borrowerName: controller.borrowerName,borrowerPhoneNumber:controller.borrowerPhoneNumber):
-                      controller.selectedTab == 'conversationWithAgent'?AgentConversationView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,):SizedBox(),
+                      controller.selectedTab == 'conversationWithAgent'?AgentConversationView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,borrowerName: controller.borrowerName,):
+                      controller.selectedTab == 'conversationWithBorrower'?BorrowerConversationView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,borrowerName: controller.borrowerName,):
+                      SizedBox(),
                     ))
                 ),
               ],

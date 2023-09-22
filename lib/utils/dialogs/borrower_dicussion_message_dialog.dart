@@ -71,8 +71,52 @@ class BorrowerDiscussionMessageDialog {
                 Expanded(
                   flex: 1,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      SizedBox(
+                        height: Get.height * .06,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryColor
+                              ),
+                              onPressed: ()async {
+                                if (messageTextController.text.isEmpty) {
+                                  SnackBarApp().errorSnack('From Error',
+                                      'Message field must not be empty.');
+                                }else if (messageTextController.text.trim().isEmpty) {
+                                  SnackBarApp().errorSnack('Form Error', 'Message field must not be empty.');
+                                }else {
+                                  ShareSendDialog().shareWithBorrowerAndAgent(messageTextController.text,borrowerId,borrowerName,borrowerPhoneNumber);
+                                }
+                              }, child: Text('Share with Borrower & Agent',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                        ),
+                      ),
+                      // SizedBox(width: 16,),
+                      SizedBox(
+                        height: Get.height * .06,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryColor
+                              ),
+                              onPressed: ()async {
+                                if (messageTextController.text.isEmpty) {
+                                  SnackBarApp().errorSnack('From Error',
+                                      'Message field must not be empty.');
+                                }else if (messageTextController.text.trim().isEmpty) {
+                                  SnackBarApp().errorSnack('Form Error', 'Message field must not be empty.');
+                                }else {
+                                  ShareSendDialog().shareWithBorrower(messageTextController.text,borrowerId,borrowerName,borrowerPhoneNumber);
+                                }
+                              }, child: Text('Share with Borrower',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                        ),
+                      ),
+                      // SizedBox(width: 16,),
                       SizedBox(
                         height: Get.height * .06,
                         child: ClipRRect(
@@ -90,11 +134,11 @@ class BorrowerDiscussionMessageDialog {
                                 }else {
                                   ShareSendDialog().shareAndSend(messageTextController.text,borrowerId,borrowerName,borrowerPhoneNumber);
                                 }
-                              }, child: Text('Share with Agent & Add Message',
+                              }, child: Text('Share with Agent',
                               style: TextStyle(fontWeight: FontWeight.bold))),
                         ),
                       ),
-                      SizedBox(width: 16,),
+                      // SizedBox(width: 16,),
                       SizedBox(
                         height: Get.height * .06,
                         child: ClipRRect(
@@ -113,7 +157,7 @@ class BorrowerDiscussionMessageDialog {
                                   await FirestoreService().addMessage(
                                       borrowerId,messageTextController.text);
                                 }
-                              }, child: Text('Add Message',
+                              }, child: Text('Only Add',
                               style: TextStyle(fontWeight: FontWeight.bold))),
                         ),
                       ),

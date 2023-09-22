@@ -98,6 +98,7 @@ class BorrowerDiscussionView extends GetView<BorrowerDiscussionViewController>{
                       itemCount: documents.length,
                       itemBuilder: (context, index) {
                         Map<String, dynamic> data = documents[index].data() as Map<String, dynamic>;
+                        bool isSharedWithNotEmpty = data['sharedWith'] != null && data['sharedWith'].isNotEmpty;
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -124,8 +125,34 @@ class BorrowerDiscussionView extends GetView<BorrowerDiscussionViewController>{
                                           color: AppColors.primaryColor
                                       ),
                                     ),
+                                    SizedBox(width: 16,),
+                                    isSharedWithNotEmpty
+                                        ? Row(
+                                      children: [
+                                        Text(
+                                          'Shared with: ',
+                                          softWrap: true,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: AppColors.textColorBlack,
+                                          ),
+                                        ),
+                                        Text(
+                                          // Assuming 'sharedWith' is a List<String>
+                                          data['sharedWith'].join(', '), // Join array elements into a single string
+                                          softWrap: true,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: AppColors.primaryColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ) : SizedBox(),
                                   ],
                                 ),
+
                                 Row(
                                   children: [
                                     Text(
