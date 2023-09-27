@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:zapa_mortgage_admin_web/services/notification_service.dart';
 import 'package:zapa_mortgage_admin_web/utils/constants.dart';
 import 'package:zapa_mortgage_admin_web/utils/dialogs/otp_dialog.dart';
 import 'package:zapa_mortgage_admin_web/utils/snack_bar.dart';
@@ -2080,6 +2081,7 @@ class FirestoreService extends GetxService {
             'addedBy': box.read(Constants.USER_NAME),
             'to': borrowerId,
             'from': 'admin',
+            'seenStatus':'unSeen'
           });
           await docRef.update({'id': docRef.id});
         });
@@ -2181,6 +2183,7 @@ class FirestoreService extends GetxService {
           'addedBy': box.read(Constants.USER_NAME),
           'to': borrowerId,
           'from': 'admin',
+          'seenStatus':'unSeen'
         });
         await docRef.update({'id': docRef.id});
       });
@@ -2197,14 +2200,13 @@ class FirestoreService extends GetxService {
   }
 
 
-  sendMessage(String agentId,String message)async{
+  sendMessage(String agentId,String message, String borrowerId)async{
     DocumentReference userDocRef =
-    firestore.collection('Chat').doc(agentId);
+    firestore.collection('users').doc(borrowerId);
 
-    CollectionReference messagesCollectionRef =
-    userDocRef.collection('Messages');
+    CollectionReference messagesCollectionRef = userDocRef.collection('AgentChat');
 
-    DocumentReference docRef = messagesCollectionRef.doc();
+    DocumentReference docRef = messagesCollectionRef.doc(agentId).collection('Messages').doc();
     await docRef.set({
       'message': message,
       'addedDateTime': DateTime.now(),
@@ -2214,7 +2216,7 @@ class FirestoreService extends GetxService {
     });
     await docRef.update({'id': docRef.id});
   }
-  sendMessageBorrower(String borrowerId,String message)async{
+  sendMessageBorrower(String borrowerId,String message, String token)async{
     DocumentReference userDocRef =
     firestore.collection('users').doc(borrowerId);
     CollectionReference messagesCollectionRef =
@@ -2227,6 +2229,46 @@ class FirestoreService extends GetxService {
       'addedBy': box.read(Constants.USER_NAME),
       'to': borrowerId,
       'from': 'admin',
+      'seenStatus':'unSeen'
+    }).then((value) {
+      NotificationService().sendNotification('chat','admin',token, 'From aria.mortgage', message, borrowerId);
+    });
+    await docRef.update({'id': docRef.id});
+  }
+  Future<void> markMessagesAsSeen(String userId) async {
+    try {
+      final QuerySnapshot<Map<String, dynamic>> chatMessages = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('BorrowerChat')
+          .where('from', isEqualTo: 'borrower') // Filter messages sent by admin
+          .get();
+
+      // Iterate through admin messages and update the seenStatus
+      for (final QueryDocumentSnapshot<Map<String, dynamic>> message in chatMessages.docs) {
+        await message.reference.update({
+          'seenStatus': 'seen',
+        });
+      }
+
+      print('Messages marked as seen successfully.');
+    } catch (e) {
+      print('Error marking messages as seen: $e');
+    }
+  }
+  saveNotificationOfBorrower(String borrowerId,String message)async{
+    DocumentReference userDocRef =
+    firestore.collection('users').doc(borrowerId);
+    CollectionReference messagesCollectionRef =
+    userDocRef.collection('Notification');
+    DocumentReference docRef = messagesCollectionRef.doc();
+    await docRef.set({
+      'message': message,
+      'addedDateTime': DateTime.now(),
+      'seenStatus':'unSeen',
+      'from': 'admin',
+      'senderName':'aria.mortgage',
+      'type':'chat'
     });
     await docRef.update({'id': docRef.id});
   }

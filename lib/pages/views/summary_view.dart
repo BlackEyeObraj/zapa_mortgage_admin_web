@@ -488,6 +488,31 @@ class SummaryView extends GetView<SummaryViewController>{
                             Expanded(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text('Contact via (WhatsApp,SMS)',textAlign: TextAlign.center,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,
+                                        color: AppColors.textColorWhite),),
+                                    StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                                      stream: FirestoreService().getUserDataNameStream(borrowerId),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasError) {
+                                          return Text('Error: ${snapshot.error}');
+                                        }
+                                        if (!snapshot.hasData) {
+                                          return Text('Loading ...');
+                                        }
+                                        var userData = snapshot.data!.data() as Map<String, dynamic>;
+                                        var doNotCall = userData['contactStatus'] as bool;
+                                        return Text(doNotCall ? 'Yes':'No' ,style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal,
+                                            color: AppColors.textColorWhite),);
+                                      },
+                                    )
+                                  ],
+                                )
+                            ),
+                            Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text('Do Not Call',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,
                                         color: AppColors.textColorWhite),),
@@ -561,7 +586,7 @@ class SummaryView extends GetView<SummaryViewController>{
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text('Agent checked the Borrower',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,
+                                    Text('Agent checked the Borrower',textAlign: TextAlign.center,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,
                                         color: AppColors.textColorWhite),),
                                     StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                                       stream: FirestoreService().getUserDataNameStream(borrowerId),

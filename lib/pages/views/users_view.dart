@@ -618,6 +618,38 @@ class UsersView extends GetView<UsersViewController>{
                                       children: [
                                         RichText(
                                           text: TextSpan(
+                                            text: 'Verified Name: ',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                            children: <TextSpan>[
+                                              TextSpan(text: data['verifiedName'] != ''?data['verifiedName']:'N/A', style: TextStyle(fontWeight: FontWeight.normal)),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(width: 16,),
+                                        InkWell(
+                                          onTap: (){
+                                            NickNameDialog().addVerifiedName(data['userId'],data['nickName']??'',data['userName'],data['phoneNumber']);
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: AppColors.secondaryColor,
+                                                borderRadius: BorderRadius.circular(1000)
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.edit,size: 12,color: AppColors.whiteColor,),
+                                                Text('Add / Edit Verified Name',style: TextStyle(fontSize: 10,color: AppColors.textColorWhite),)
+                                              ],
+                                            ).paddingAll(4),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(height: 8,),
+                                    Row(
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
                                             text: 'Nick Name: ',
                                             style: TextStyle(fontWeight: FontWeight.bold),
                                             children: <TextSpan>[
@@ -691,7 +723,7 @@ class UsersView extends GetView<UsersViewController>{
 
                             InkWell(
                               onTap: ()async{
-                                Get.toNamed(RouteName.userDetailScreen,arguments: {'borrowerId': data['userId'],'borrowerPhoneNumber': data['phoneNumber'],'borrowerUserName':data['userName']});
+                                Get.toNamed(RouteName.userDetailScreen,arguments: {'borrowerId': data['userId'],'borrowerPhoneNumber': data['phoneNumber'],'borrowerUserName':data['userName'],'token':data['deviceToken']});
                               },
                               child: MouseRegion(
                                 onEnter: (_) => controller.setHoverOption(data['phoneNumber']),

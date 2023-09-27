@@ -116,7 +116,7 @@ class ChatDialog{
                             if(messageController.text.isEmpty){
                               SnackBarApp().errorSnack('Form Error ', 'Please enter a message to send');
                             }else{
-                              FirestoreService().sendMessage(agentId,messageController.text);
+                              FirestoreService().sendMessage(agentId,messageController.text,borrowerId);
                               messageController.clear();
                             }
                           }, icon: Icon(Icons.send))

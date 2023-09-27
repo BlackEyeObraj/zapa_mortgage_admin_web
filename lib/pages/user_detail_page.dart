@@ -361,7 +361,7 @@ class UserDetailPage extends GetView<UserDetailPageController>{
                       controller.selectedTab == 'coBorrowers'?CoBorrowerView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,):
                       controller.selectedTab == 'BorrowerDiscussions'?BorrowerDiscussionView(borrowerId: controller.borrowerId,adminId: GetStorage().read(Constants.USER_ID),borrowerName: controller.borrowerName,borrowerPhoneNumber:controller.borrowerPhoneNumber):
                       controller.selectedTab == 'conversationWithAgent'?AgentConversationView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,borrowerName: controller.borrowerName,):
-                      controller.selectedTab == 'conversationWithBorrower'?BorrowerConversationView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,borrowerName: controller.borrowerName,):
+                      controller.selectedTab == 'conversationWithBorrower'?BorrowerConversationView(borrowerId: controller.borrowerId,borrowerPhoneNumber: controller.borrowerPhoneNumber,borrowerName: controller.borrowerName,token: controller.token,):
                       SizedBox(),
                     ))
                 ),

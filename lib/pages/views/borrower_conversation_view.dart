@@ -12,7 +12,8 @@ class BorrowerConversationView extends GetView<BorrowerConversationViewControlle
   final String borrowerId;
   final String borrowerPhoneNumber;
   final String borrowerName;
-  BorrowerConversationView({required this.borrowerId, required this.borrowerPhoneNumber, required this.borrowerName});
+  final String token;
+  BorrowerConversationView({required this.borrowerId, required this.borrowerPhoneNumber, required this.borrowerName, required this.token});
   @override
   Widget build(BuildContext context) {
     return GetBuilder(
@@ -84,7 +85,7 @@ class BorrowerConversationView extends GetView<BorrowerConversationViewControlle
 
                   // If the data is loaded successfully, process and display it.
                   final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents = snapshot.data!.docs;
-
+                  FirestoreService().markMessagesAsSeen(borrowerId);
                   // Use the 'documents' list to display user data.
                   return ListView.builder(
                     reverse: true, // Start from the bottom
@@ -98,15 +99,51 @@ class BorrowerConversationView extends GetView<BorrowerConversationViewControlle
                       // Determine the alignment based on the sender (admin or user)
                       final alignment = from == 'admin' ? Alignment.centerRight : Alignment.centerLeft;
                       // Display user information in ListTile or any other widget.
-                      return Align(
-                        alignment: alignment,
+                      return from == 'admin'?
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: AppColors.primaryColor, // Customize the color
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  message,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                    color: Colors.white, // Customize the text color
+                                  ),
+                                ),
+                                SizedBox(height: 4,),
+                                Text(
+                                  '${UtilMethods().parseFirestoreTimestamp(addedDateTime)}', // Display the addedDateTime below the message
+                                  style: TextStyle(
+                                    fontSize: 8,
+                                    color: Colors.white, // Customize the text color
+                                  ),
+                                ), Container(
+                                  width: 18,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.whiteColor.withOpacity(.4),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child:userData['seenStatus'] == 'seen'? Icon(Icons.check_circle,color: AppColors.whiteColor,size: 16,):Icon(Icons.check_circle,color: AppColors.greyColor,size: 16,),
+                                )
+                              ],
+                            ).paddingSymmetric(horizontal: 8,vertical: 8)
+                        ).marginOnly(bottom: 16),
+                      ):Align(
+                        alignment: Alignment.centerLeft,
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: from == 'admin' ? AppColors.primaryColor : Colors.grey.withOpacity(.2), // Customize the color
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.grey.withOpacity(.2)
                           ),
-                          padding: EdgeInsets.all(8),
-                          margin: EdgeInsets.symmetric(vertical: 4),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -115,20 +152,20 @@ class BorrowerConversationView extends GetView<BorrowerConversationViewControlle
                                 style: TextStyle(
                                   fontWeight: FontWeight.normal,
                                   fontSize: 16,
-                                  color: from == 'admin' ? Colors.white : Colors.black, // Customize the text color
+                                  color: Colors.black, // Customize the text color
                                 ),
                               ),
-                              SizedBox(height: 8), // Add some spacing
+                              SizedBox(height: 4,),
                               Text(
                                 '${UtilMethods().parseFirestoreTimestamp(addedDateTime)}', // Display the addedDateTime below the message
                                 style: TextStyle(
                                   fontSize: 8,
-                                  color: from == 'admin' ? Colors.white : Colors.black.withOpacity(.6), // Customize the text color
+                                  color: Colors.black.withOpacity(.6), // Customize the text color
                                 ),
                               ),
                             ],
-                          ),
-                        ),
+                          ).paddingSymmetric(horizontal: 8,vertical: 8),
+                        ).marginOnly(bottom: 16),
                       );
                     },
                   );
@@ -149,7 +186,7 @@ class BorrowerConversationView extends GetView<BorrowerConversationViewControlle
                     if(controller.messageController.text.isEmpty){
                       SnackBarApp().errorSnack('Form Error ', 'Please enter a message to send');
                     }else{
-                      FirestoreService().sendMessageBorrower(borrowerId,controller.messageController.text);
+                      FirestoreService().sendMessageBorrower(borrowerId,controller.messageController.text,token);
                       controller.messageController.clear();
                     }
                   }, icon: Icon(Icons.send))
@@ -163,3 +200,44 @@ class BorrowerConversationView extends GetView<BorrowerConversationViewControlle
   }
 
 }
+//   Align(
+//   alignment: alignment,
+//   child: Container(
+//     decoration: BoxDecoration(
+//       borderRadius: BorderRadius.circular(8),
+//       color: from == 'admin' ? AppColors.primaryColor : Colors.grey.withOpacity(.2), // Customize the color
+//     ),
+//     padding: EdgeInsets.all(8),
+//     margin: EdgeInsets.symmetric(vertical: 4),
+//     child: Column(
+//       crossAxisAlignment: CrossAxisAlignment.end,
+//       children: [
+//         Text(
+//           message,
+//           style: TextStyle(
+//             fontWeight: FontWeight.normal,
+//             fontSize: 16,
+//             color: from == 'admin' ? Colors.white : Colors.black, // Customize the text color
+//           ),
+//         ),
+//         SizedBox(height: 8), // Add some spacing
+//         Text(
+//           '${UtilMethods().parseFirestoreTimestamp(addedDateTime)}', // Display the addedDateTime below the message
+//           style: TextStyle(
+//             fontSize: 8,
+//             color: from == 'admin' ? Colors.white : Colors.black.withOpacity(.6), // Customize the text color
+//           ),
+//         ),
+//         from == 'admin'? Container(
+//           width: 18,
+//           height: 18,
+//           decoration: BoxDecoration(
+//             color: AppColors.whiteColor.withOpacity(.4),
+//             shape: BoxShape.circle,
+//           ),
+//           child:userData['seenStatus'] == 'seen'? Icon(Icons.check_circle,color: AppColors.whiteColor,size: 16,):Icon(Icons.check_circle,color: AppColors.greyColor,size: 16,),
+//         ):SizedBox()
+//       ],
+//     ),
+//   ),
+// );
