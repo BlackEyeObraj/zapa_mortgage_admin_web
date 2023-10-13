@@ -43,8 +43,8 @@ addNickName(String userId, String nickName, String userName, String phoneNumber)
     cancel: TextButton(onPressed: () => Get.back(), child: Text('Cancel'))
   );
 }
-addVerifiedName(String userId, String nickName, String userName, String phoneNumber){
-  final nickNameTextController = TextEditingController(text: nickName);
+addVerifiedName(String userId, String verifiedName, String userName, String phoneNumber){
+  final VerifiedNameTextController = TextEditingController(text: verifiedName);
 
   return Get.defaultDialog(
     title: 'Add / Edit Verified Name',
@@ -57,7 +57,7 @@ addVerifiedName(String userId, String nickName, String userName, String phoneNum
             borderRadius: BorderRadius.circular(4.0),
           ),
           child: TextFormField(
-            controller: nickNameTextController,
+            controller: VerifiedNameTextController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               isDense: true,
@@ -75,9 +75,9 @@ addVerifiedName(String userId, String nickName, String userName, String phoneNum
     ),
       confirm: TextButton(onPressed: (){
         Map<String, dynamic> updatedData = {
-          'verifiedName': nickNameTextController.text,
+          'verifiedName': VerifiedNameTextController.text,
         };
-        FirestoreService().addEditUserNickName(userId,updatedData,nickNameTextController.text,userName,phoneNumber);
+        FirestoreService().addEditUserVerifiedName(userId,updatedData,VerifiedNameTextController.text,userName,phoneNumber);
       }, child: Text('Add / Update')),
     cancel: TextButton(onPressed: () => Get.back(), child: Text('Cancel'))
   );

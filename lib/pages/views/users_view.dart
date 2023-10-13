@@ -3,15 +3,12 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_network/image_network.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:zapa_mortgage_admin_web/controllers/users_view_controller.dart';
 import 'package:zapa_mortgage_admin_web/res/app_colors.dart';
 import 'package:zapa_mortgage_admin_web/services/firestore_service.dart';
 import 'package:zapa_mortgage_admin_web/utils/dialogs/borrower_dialog.dart';
 import 'package:zapa_mortgage_admin_web/utils/dialogs/nick_name_dialog.dart';
 import 'package:zapa_mortgage_admin_web/utils/routes/route_name.dart';
-
-import '../../utils/constants.dart';
 
 class UsersView extends GetView<UsersViewController>{
   @override
@@ -628,7 +625,7 @@ class UsersView extends GetView<UsersViewController>{
                                         SizedBox(width: 16,),
                                         InkWell(
                                           onTap: (){
-                                            NickNameDialog().addVerifiedName(data['userId'],data['nickName']??'',data['userName'],data['phoneNumber']);
+                                            NickNameDialog().addVerifiedName(data['userId'],data['verifiedName']??'',data['userName'],data['phoneNumber']);
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(

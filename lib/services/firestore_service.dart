@@ -507,6 +507,18 @@ class FirestoreService extends GetxService {
       print('Error updating document: $e');
     }
   }
+  void addEditUserVerifiedName(String userId, Map<String, dynamic> updatedData, String verifiedName, String userName, String phoneNumber) async {
+    CollectionReference collectionReference = FirebaseFirestore.instance.collection('users');
+    DocumentReference docReference = collectionReference.doc(userId);
+    try {
+      await docReference.update(updatedData);
+      print('Document updated successfully');
+      await historyDataAdd("${box.read(Constants.USER_NAME)} has change verified name to ${verifiedName.isEmpty?'N/A':verifiedName} of ${userName.isEmpty?phoneNumber:userName}");
+      Get.back();
+    } catch (e) {
+      print('Error updating document: $e');
+    }
+  }
   Stream<DocumentSnapshot<Map<String, dynamic>>> getUserDataNameStream(String userId) {
     return FirebaseFirestore.instance.collection('users').doc(userId).snapshots();
   }
